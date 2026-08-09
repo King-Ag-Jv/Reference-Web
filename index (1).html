@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ferro — Systems Engineering, Forged in C/C++</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0D0F12;
+    --surface:#15181C;
+    --surface-alt:#1B1F24;
+    --text:#E9E6DF;
+    --text-dim:#8B9198;
+    --accent:#FF5A2E;
+    --accent-dim:#B8451F;
+    --accent-2:#5FA8D3;
+    --line:#2A2E33;
+    --font-display:'Space Grotesk',sans-serif;
+    --font-body:'IBM Plex Sans',sans-serif;
+    --font-mono:'IBM Plex Mono',monospace;
+    --maxw:1180px;
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--font-body);
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit;text-decoration:none;}
+  ul{list-style:none;}
+  img{max-width:100%;display:block;}
+
+  a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible{
+    outline:2px solid var(--accent-2);
+    outline-offset:3px;
+    border-radius:2px;
+  }
+
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 32px;}
+
+  h1,h2,h3{font-family:var(--font-display);font-weight:600;letter-spacing:-0.01em;}
+
+  .eyebrow{
+    font-family:var(--font-mono);
+    font-size:12.5px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--accent);
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .eyebrow::before{
+    content:'';
+    width:16px;height:1px;
+    background:var(--accent);
+    display:inline-block;
+  }
+
+  /* ---------- HEADER / NAV ---------- */
+  header{
+    position:sticky;top:0;z-index:100;
+    background:rgba(13,15,18,0.86);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav{
+    display:flex;align-items:center;justify-content:space-between;
+    height:72px;
+  }
+  .logo{
+    display:flex;align-items:center;gap:10px;
+    font-family:var(--font-display);
+    font-weight:700;font-size:19px;
+    letter-spacing:-0.01em;
+  }
+  .logo-mark{
+    width:26px;height:26px;flex:none;
+  }
+  .logo-mark path{fill:none;stroke:var(--accent);stroke-width:2;}
+  .logo small{
+    font-family:var(--font-mono);
+    font-weight:400;
+    font-size:11px;
+    color:var(--text-dim);
+    letter-spacing:0.06em;
+    margin-left:2px;
+  }
+
+  .nav-links{
+    display:flex;align-items:center;gap:38px;
+  }
+  .nav-links a{
+    font-size:14.5px;
+    color:var(--text-dim);
+    position:relative;
+    padding:4px 0;
+    transition:color .2s ease;
+  }
+  .nav-links a:hover{color:var(--text);}
+  .nav-links a::after{
+    content:'';
+    position:absolute;left:0;bottom:-2px;
+    width:0;height:1px;background:var(--accent);
+    transition:width .25s ease;
+  }
+  .nav-links a:hover::after{width:100%;}
+
+  .btn{
+    font-family:var(--font-mono);
+    font-size:13px;
+    font-weight:500;
+    padding:10px 18px;
+    border-radius:3px;
+    border:1px solid var(--accent);
+    color:var(--bg);
+    background:var(--accent);
+    cursor:pointer;
+    transition:transform .18s ease, box-shadow .18s ease, background .18s ease;
+    display:inline-flex;align-items:center;gap:8px;
+  }
+  .btn:hover{
+    background:#FF6B42;
+    box-shadow:0 0 0 3px rgba(255,90,46,0.15);
+    transform:translateY(-1px);
+  }
+  .btn-ghost{
+    background:transparent;
+    color:var(--text);
+    border:1px solid var(--line);
+  }
+  .btn-ghost:hover{
+    border-color:var(--accent-2);
+    background:transparent;
+    box-shadow:0 0 0 3px rgba(95,168,211,0.12);
+  }
+
+  .nav-toggle{
+    display:none;
+    background:none;border:none;color:var(--text);
+    font-size:22px;cursor:pointer;
+  }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    padding:96px 0 100px;
+    border-bottom:1px solid var(--line);
+    position:relative;
+    overflow:hidden;
+  }
+  .hero::before{
+    content:'';
+    position:absolute;
+    top:-200px;right:-160px;
+    width:520px;height:520px;
+    background:radial-gradient(circle, rgba(255,90,46,0.10), transparent 70%);
+    pointer-events:none;
+  }
+  .hero-grid{
+    display:grid;
+    grid-template-columns:1.15fr 0.85fr;
+    gap:56px;
+    align-items:center;
+    position:relative;
+  }
+  .hero h1{
+    font-size:clamp(36px,4.6vw,58px);
+    line-height:1.06;
+    margin:20px 0 22px;
+  }
+  .hero h1 em{
+    font-style:normal;
+    color:var(--accent);
+  }
+  .hero p.lede{
+    font-size:17px;
+    color:var(--text-dim);
+    max-width:46ch;
+    margin-bottom:34px;
+  }
+  .hero-ctas{display:flex;gap:14px;flex-wrap:wrap;}
+
+  .terminal{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:8px;
+    overflow:hidden;
+    box-shadow:0 30px 60px -20px rgba(0,0,0,0.6);
+  }
+  .terminal-bar{
+    display:flex;align-items:center;gap:7px;
+    padding:12px 16px;
+    background:var(--surface-alt);
+    border-bottom:1px solid var(--line);
+  }
+  .terminal-bar span{width:10px;height:10px;border-radius:50%;background:#3A3F45;}
+  .terminal-bar span:nth-child(1){background:#FF5A2E;opacity:.55;}
+  .terminal-bar span:nth-child(2){background:#E8B440;opacity:.55;}
+  .terminal-bar span:nth-child(3){background:#5FA8D3;opacity:.55;}
+  .terminal-title{
+    margin-left:8px;font-family:var(--font-mono);font-size:12px;color:var(--text-dim);
+  }
+  .terminal-body{
+    padding:22px 20px 26px;
+    font-family:var(--font-mono);
+    font-size:13px;
+    min-height:220px;
+  }
+  .terminal-body .line{
+    color:var(--text-dim);
+    margin-bottom:9px;
+    opacity:0;
+    animation:reveal .3s ease forwards;
+  }
+  .terminal-body .line .ok{color:#6FCF97;}
+  .terminal-body .line .prompt{color:var(--accent-2);}
+  .terminal-body .cursor{
+    display:inline-block;width:7px;height:14px;
+    background:var(--accent);
+    animation:blink 1s steps(1) infinite;
+    vertical-align:middle;
+  }
+  @keyframes reveal{to{opacity:1;}}
+  @keyframes blink{50%{opacity:0;}}
+
+  /* ---------- SECTION SHELL ---------- */
+  section{padding:96px 0;border-bottom:1px solid var(--line);}
+  .section-head{
+    display:flex;justify-content:space-between;align-items:flex-end;
+    gap:32px;margin-bottom:52px;flex-wrap:wrap;
+  }
+  .section-head h2{font-size:clamp(26px,3vw,36px);}
+  .section-head p{color:var(--text-dim);max-width:40ch;font-size:15px;}
+
+  /* ---------- CAPABILITIES ---------- */
+  .cap-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:1px;
+    background:var(--line);
+    border:1px solid var(--line);
+    border-radius:10px;
+    overflow:hidden;
+  }
+  .cap-card{
+    background:var(--surface);
+    padding:32px 26px;
+    transition:background .2s ease;
+  }
+  .cap-card:hover{background:var(--surface-alt);}
+  .cap-num{
+    font-family:var(--font-mono);
+    font-size:12px;color:var(--accent);margin-bottom:22px;
+  }
+  .cap-card h3{font-size:18px;margin-bottom:10px;}
+  .cap-card p{font-size:14px;color:var(--text-dim);}
+
+  /* ---------- WORK ---------- */
+  .work-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:24px;
+  }
+  .work-card{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:28px;
+    display:flex;flex-direction:column;
+    min-height:250px;
+    transition:transform .2s ease, border-color .2s ease;
+  }
+  .work-card:hover{
+    transform:translateY(-4px);
+    border-color:var(--accent-dim);
+  }
+  .work-tag{
+    font-family:var(--font-mono);
+    font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--accent-2);
+    margin-bottom:18px;
+  }
+  .work-card h3{font-size:21px;margin-bottom:12px;}
+  .work-card p{font-size:14px;color:var(--text-dim);flex:1;}
+  .work-meta{
+    display:flex;gap:18px;margin-top:20px;
+    padding-top:18px;border-top:1px solid var(--line);
+    font-family:var(--font-mono);font-size:12px;color:var(--text-dim);
+  }
+  .work-meta strong{color:var(--text);display:block;font-size:15px;font-family:var(--font-display);}
+
+  /* ---------- PROCESS ---------- */
+  .process-list{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:24px;
+  }
+  .process-item{position:relative;padding-top:8px;}
+  .process-item::before{
+    content:'';
+    position:absolute;top:0;left:0;
+    width:100%;height:2px;
+    background:var(--line);
+  }
+  .process-item.active::before{background:var(--accent);}
+  .process-index{
+    font-family:var(--font-mono);
+    font-size:34px;font-weight:600;
+    color:var(--surface-alt);
+    -webkit-text-stroke:1px var(--line);
+    display:block;margin:18px 0 14px;
+  }
+  .process-item h3{font-size:17px;margin-bottom:10px;}
+  .process-item p{font-size:14px;color:var(--text-dim);}
+
+  /* ---------- STATS / QUOTE ---------- */
+  .quote-band{
+    background:var(--surface);
+    display:grid;
+    grid-template-columns:1.4fr 1fr;
+  }
+  .quote-band > div{padding:64px 56px;}
+  .quote-left{border-right:1px solid var(--line);}
+  .quote-left p{
+    font-family:var(--font-display);
+    font-size:clamp(20px,2.4vw,27px);
+    line-height:1.4;
+    max-width:34ch;
+  }
+  .quote-left cite{
+    display:block;margin-top:24px;
+    font-style:normal;font-family:var(--font-mono);
+    font-size:13px;color:var(--text-dim);
+  }
+  .stat-grid{
+    display:grid;grid-template-columns:1fr 1fr;gap:28px;
+  }
+  .stat-num{
+    font-family:var(--font-display);
+    font-size:34px;color:var(--accent);
+  }
+  .stat-label{
+    font-family:var(--font-mono);
+    font-size:12px;color:var(--text-dim);margin-top:6px;
+  }
+
+  /* ---------- CONTACT ---------- */
+  .contact-grid{
+    display:grid;grid-template-columns:1fr 1fr;gap:64px;
+    align-items:start;
+  }
+  .contact-grid h2{font-size:clamp(28px,3.4vw,40px);margin-bottom:18px;}
+  .contact-grid > div:first-child p{color:var(--text-dim);max-width:42ch;margin-bottom:28px;}
+  .contact-links a{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:16px 0;border-bottom:1px solid var(--line);
+    font-family:var(--font-mono);font-size:14px;
+  }
+  .contact-links a span:last-child{color:var(--accent);transition:transform .2s ease;}
+  .contact-links a:hover span:last-child{transform:translateX(4px);}
+
+  form{display:flex;flex-direction:column;gap:16px;}
+  .field{display:flex;flex-direction:column;gap:8px;}
+  .field label{
+    font-family:var(--font-mono);font-size:12px;
+    color:var(--text-dim);letter-spacing:.04em;
+  }
+  .field input, .field textarea{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:5px;
+    padding:12px 14px;
+    color:var(--text);
+    font-family:var(--font-body);
+    font-size:14px;
+  }
+  .field textarea{resize:vertical;min-height:100px;}
+  .field input::placeholder, .field textarea::placeholder{color:#565C63;}
+
+  /* ---------- FOOTER ---------- */
+  footer{padding:64px 0 32px;}
+  .footer-grid{
+    display:grid;
+    grid-template-columns:1.4fr 1fr 1fr 1fr;
+    gap:40px;
+    padding-bottom:48px;
+  }
+  .footer-brand p{color:var(--text-dim);font-size:14px;margin-top:14px;max-width:32ch;}
+  .footer-col h4{
+    font-family:var(--font-mono);
+    font-size:12px;color:var(--text-dim);
+    text-transform:uppercase;letter-spacing:.08em;
+    margin-bottom:16px;
+  }
+  .footer-col a{
+    display:block;font-size:14px;color:var(--text);
+    margin-bottom:11px;transition:color .2s ease;
+  }
+  .footer-col a:hover{color:var(--accent);}
+  .footer-bottom{
+    border-top:1px solid var(--line);
+    padding-top:24px;
+    display:flex;justify-content:space-between;align-items:center;
+    font-family:var(--font-mono);font-size:12.5px;color:var(--text-dim);
+    flex-wrap:wrap;gap:12px;
+  }
+  .footer-bottom .comment{color:#565C63;}
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width:900px){
+    .hero-grid{grid-template-columns:1fr;}
+    .cap-grid{grid-template-columns:repeat(2,1fr);}
+    .work-grid{grid-template-columns:1fr;}
+    .process-list{grid-template-columns:repeat(2,1fr);}
+    .quote-band{grid-template-columns:1fr;}
+    .quote-left{border-right:none;border-bottom:1px solid var(--line);}
+    .contact-grid{grid-template-columns:1fr;}
+    .footer-grid{grid-template-columns:1fr 1fr;}
+  }
+  @media (max-width:680px){
+    .wrap{padding:0 20px;}
+    .nav-links{
+      position:fixed;top:72px;left:0;right:0;bottom:0;
+      background:var(--bg);
+      flex-direction:column;
+      align-items:flex-start;
+      padding:32px;
+      gap:22px;
+      transform:translateX(100%);
+      transition:transform .3s ease;
+    }
+    .nav-links.open{transform:translateX(0);}
+    .nav-toggle{display:block;}
+    .cap-grid{grid-template-columns:1fr;}
+    .process-list{grid-template-columns:1fr;}
+    .footer-grid{grid-template-columns:1fr;gap:32px;}
+    section{padding:64px 0;}
+    .hero{padding:56px 0 64px;}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    *{animation-duration:0.001ms !important;animation-iteration-count:1 !important;transition-duration:0.001ms !important;scroll-behavior:auto !important;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <a href="#top" class="logo">
+      <svg class="logo-mark" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M4 18 L11 4 L18 4 L11 18 Z M11 18 L14 18 L21 8 L14 8" />
+      </svg>
+      FERRO<small>/ SYS</small>
+    </a>
+    <nav class="nav-links" id="navLinks">
+      <a href="#capabilities">Capabilities</a>
+      <a href="#work">Work</a>
+      <a href="#process">Process</a>
+      <a href="#contact">Contact</a>
+      <a href="#contact" class="btn">Start a build →</a>
+    </nav>
+    <button class="nav-toggle" id="navToggle" aria-label="Toggle menu" aria-expanded="false">☰</button>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- HERO -->
+  <section class="hero" style="border-bottom:1px solid var(--line);padding-top:96px;">
+    <div class="wrap hero-grid">
+      <div>
+        <span class="eyebrow">C / C++ · Systems Engineering</span>
+        <h1>We forge software<br>that survives<br>contact with <em>the metal.</em></h1>
+        <p class="lede">Ferro is a small studio building embedded firmware, real-time engines, and performance-critical C/C++ systems for teams who can't afford a garbage collector's mood swings.</p>
+        <div class="hero-ctas">
+          <a href="#contact" class="btn">Start a build →</a>
+          <a href="#work" class="btn btn-ghost">See the work</a>
+        </div>
+      </div>
+      <div class="terminal" aria-hidden="true">
+        <div class="terminal-bar">
+          <span></span><span></span><span></span>
+          <span class="terminal-title">build.log</span>
+        </div>
+        <div class="terminal-body" id="termBody"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CAPABILITIES -->
+  <section id="capabilities">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">Capabilities</span>
+          <h2>Four disciplines, one toolchain.</h2>
+        </div>
+        <p>Everything here compiles down to code we'd ship on hardware we're personally responsible for.</p>
+      </div>
+      <div class="cap-grid">
+        <div class="cap-card">
+          <div class="cap-num">01</div>
+          <h3>Embedded Systems</h3>
+          <p>Bare-metal and RTOS firmware for constrained hardware — from bring-up to production flash.</p>
+        </div>
+        <div class="cap-card">
+          <div class="cap-num">02</div>
+          <h3>Performance Engineering</h3>
+          <p>Profiling, cache-aware data layout, and hot-path rewrites that turn milliseconds into microseconds.</p>
+        </div>
+        <div class="cap-card">
+          <div class="cap-num">03</div>
+          <h3>Compilers & Toolchains</h3>
+          <p>Custom build pipelines, cross-compilation, and static analysis wired into CI from day one.</p>
+        </div>
+        <div class="cap-card">
+          <div class="cap-num">04</div>
+          <h3>Systems Architecture</h3>
+          <p>Memory models, concurrency strategy, and interface design for codebases meant to outlive us.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WORK -->
+  <section id="work">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">Selected Work</span>
+          <h2>Shipped, benchmarked, on fire in production (rarely).</h2>
+        </div>
+        <p>A few of the systems we've forged, linked, and handed off.</p>
+      </div>
+      <div class="work-grid">
+        <div class="work-card">
+          <span class="work-tag">Telemetry Engine</span>
+          <h3>Kiln</h3>
+          <p>A lock-free ring-buffer telemetry pipeline in C++ handling sensor ingest for industrial furnaces at sub-millisecond latency.</p>
+          <div class="work-meta">
+            <div><strong>0.4ms</strong>p99 latency</div>
+            <div><strong>C++20</strong>core language</div>
+          </div>
+        </div>
+        <div class="work-card">
+          <span class="work-tag">Kernel</span>
+          <h3>Anvil RTOS</h3>
+          <p>A preemptive, priority-based RTOS kernel for Cortex-M targets with a 6KB footprint and deterministic scheduling.</p>
+          <div class="work-meta">
+            <div><strong>6KB</strong>kernel size</div>
+            <div><strong>C11</strong>core language</div>
+          </div>
+        </div>
+        <div class="work-card">
+          <span class="work-tag">Diagnostics</span>
+          <h3>Slag</h3>
+          <p>A heap and stack profiler for embedded C that catches leaks and fragmentation before they reach the field.</p>
+          <div class="work-meta">
+            <div><strong>−38%</strong>heap fragmentation</div>
+            <div><strong>C99</strong>core language</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROCESS -->
+  <section id="process">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">Process</span>
+          <h2>Every build, same four passes.</h2>
+        </div>
+        <p>It's a literal pipeline, so we numbered it like one.</p>
+      </div>
+      <div class="process-list">
+        <div class="process-item active">
+          <span class="process-index">01</span>
+          <h3>Compile</h3>
+          <p>Spec, constraints, and hardware targets get written down before a single header is touched.</p>
+        </div>
+        <div class="process-item active">
+          <span class="process-index">02</span>
+          <h3>Link</h3>
+          <p>Architecture and module boundaries are drawn so teams can work in parallel without stepping on memory.</p>
+        </div>
+        <div class="process-item">
+          <span class="process-index">03</span>
+          <h3>Optimize</h3>
+          <p>Profile against real workloads, cut allocations, and tighten hot paths until the numbers hold.</p>
+        </div>
+        <div class="process-item">
+          <span class="process-index">04</span>
+          <h3>Ship</h3>
+          <p>Flash it, monitor it, and stay on call through the first release cycle in the wild.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- QUOTE / STATS -->
+  <section style="padding:0;">
+    <div class="quote-band">
+      <div class="quote-left">
+        <p>“Ferro rewrote our ingest path in six weeks. Same hardware, a third of the CPU. Nobody at the company believed the graph until they saw it live.”</p>
+        <cite>— Director of Engineering, industrial sensing company</cite>
+      </div>
+      <div>
+        <div class="stat-grid">
+          <div><div class="stat-num">3.1×</div><div class="stat-label">Avg. throughput gain</div></div>
+          <div><div class="stat-num">−61%</div><div class="stat-label">Memory footprint</div></div>
+          <div><div class="stat-num">14</div><div class="stat-label">Platforms shipped to</div></div>
+          <div><div class="stat-num">0</div><div class="stat-label">Segfaults in prod, this year</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact">
+    <div class="wrap contact-grid">
+      <div>
+        <span class="eyebrow">Start a build</span>
+        <h2>Tell us what needs to run faster, smaller, or longer.</h2>
+        <p>Send over the constraints — target hardware, latency budget, memory ceiling — and we'll reply with a straight answer on scope.</p>
+        <div class="contact-links">
+          <a href="mailto:build@ferro.systems"><span>build@ferro.systems</span><span>→</span></a>
+          <a href="#"><span>github.com/ferro-systems</span><span>→</span></a>
+          <a href="#"><span>+1 (415) 555‑0142</span><span>→</span></a>
+        </div>
+      </div>
+      <form onsubmit="event.preventDefault();">
+        <div class="field">
+          <label for="name">Name</label>
+          <input id="name" type="text" placeholder="Ada Lovelace">
+        </div>
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" type="email" placeholder="ada@yourcompany.com">
+        </div>
+        <div class="field">
+          <label for="details">Project details</label>
+          <textarea id="details" placeholder="Target platform, timeline, current bottleneck…"></textarea>
+        </div>
+        <button type="submit" class="btn" style="align-self:flex-start;margin-top:6px;">Send brief →</button>
+      </form>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="#top" class="logo">
+          <svg class="logo-mark" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M4 18 L11 4 L18 4 L11 18 Z M11 18 L14 18 L21 8 L14 8" />
+          </svg>
+          FERRO<small>/ SYS</small>
+        </a>
+        <p>A small studio building embedded firmware and performance-critical C/C++ systems.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Studio</h4>
+        <a href="#capabilities">Capabilities</a>
+        <a href="#work">Work</a>
+        <a href="#process">Process</a>
+      </div>
+      <div class="footer-col">
+        <h4>Connect</h4>
+        <a href="mailto:build@ferro.systems">Email</a>
+        <a href="#">GitHub</a>
+        <a href="#">LinkedIn</a>
+      </div>
+      <div class="footer-col">
+        <h4>Studio Hours</h4>
+        <a href="#" style="color:var(--text-dim);">Mon–Fri, 09:00–18:00 UTC</a>
+        <a href="#" style="color:var(--text-dim);">Remote-first</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Ferro Systems. All builds final.</span>
+      <span class="comment">// compiled with care, linked with intent</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Mobile nav toggle
+  const navToggle = document.getElementById('navToggle');
+  const navLinks = document.getElementById('navLinks');
+  navToggle.addEventListener('click', () => {
+    const isOpen = navLinks.classList.toggle('open');
+    navToggle.setAttribute('aria-expanded', isOpen);
+    navToggle.textContent = isOpen ? '✕' : '☰';
+  });
+  navLinks.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+    navLinks.classList.remove('open');
+    navToggle.setAttribute('aria-expanded', 'false');
+    navToggle.textContent = '☰';
+  }));
+
+  // Terminal build-log signature animation
+  const termBody = document.getElementById('termBody');
+  const logLines = [
+    '<span class="prompt">$</span> cc -O3 -flto -march=native main.c',
+    'compiling core.c ..... <span class="ok">ok</span>',
+    'compiling scheduler.c ..... <span class="ok">ok</span>',
+    'linking 14 objects ..... <span class="ok">ok</span>',
+    'stripping symbols ..... <span class="ok">ok</span>',
+    'optimizing hot paths ..... <span class="ok">ok</span>',
+    '<span class="prompt">$</span> ./run --bench',
+    'throughput: 3.1x baseline',
+    'peak memory: −61%',
+    '<span class="ok">build succeeded</span> in 118ms'
+  ];
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function typeLog(){
+    termBody.innerHTML = '';
+    if (reduceMotion){
+      logLines.forEach(l => {
+        const div = document.createElement('div');
+        div.className = 'line';
+        div.style.opacity = '1';
+        div.innerHTML = l;
+        termBody.appendChild(div);
+      });
+      return;
+    }
+    let i = 0;
+    function next(){
+      if (i >= logLines.length){
+        const cursor = document.createElement('span');
+        cursor.className = 'cursor';
+        termBody.appendChild(cursor);
+        return;
+      }
+      const div = document.createElement('div');
+      div.className = 'line';
+      div.innerHTML = logLines[i];
+      div.style.animationDelay = '0.02s';
+      termBody.appendChild(div);
+      i++;
+      setTimeout(next, 260);
+    }
+    next();
+  }
+  typeLog();
+
+  // Scroll reveal for cards
+  const revealTargets = document.querySelectorAll('.cap-card, .work-card, .process-item');
+  if (!reduceMotion && 'IntersectionObserver' in window){
+    revealTargets.forEach(el => { el.style.opacity = '0'; el.style.transform = 'translateY(14px)'; el.style.transition = 'opacity .5s ease, transform .5s ease'; });
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting){
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+    revealTargets.forEach(el => io.observe(el));
+  }
+</script>
+
+</body>
+</html>
