@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Halvorsen &amp; Moen — Architecture Studio</title>
+<style>
+  :root{
+    --concrete:#EDECE8;
+    --ink:#15181A;
+    --moss:#4B5D45;
+    --line:#C9C7BF;
+    --paper:#F7F6F3;
+    --grey:#75746D;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--concrete);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;
+    line-height:1.5;
+  }
+  a{color:inherit;text-decoration:none;}
+  h1,h2,h3{font-weight:600;letter-spacing:-0.02em;}
+  .wrap{max-width:1320px;margin:0 auto;padding:0 40px;}
+
+  header{
+    position:fixed;top:0;left:0;right:0;z-index:100;
+    display:flex;justify-content:space-between;align-items:center;
+    padding:26px 40px;
+    background:rgba(237,236,232,.88);backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--line);
+  }
+  .brand{font-size:15px;font-weight:700;letter-spacing:.02em;text-transform:uppercase;}
+  nav{display:flex;gap:34px;font-size:13px;text-transform:uppercase;letter-spacing:.06em;}
+  nav a{opacity:.7;transition:opacity .2s;position:relative;}
+  nav a:hover{opacity:1;}
+
+  /* Hero — blueprint grid signature */
+  .hero{
+    min-height:100vh;position:relative;display:flex;flex-direction:column;justify-content:flex-end;
+    padding:0 40px 70px;overflow:hidden;
+  }
+  .grid-overlay{
+    position:absolute;inset:0;top:0;
+    background-image:
+      linear-gradient(to right, rgba(21,24,26,.06) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(21,24,26,.06) 1px, transparent 1px);
+    background-size:64px 64px;
+    pointer-events:none;
+    opacity:0;
+    transition:opacity 1.2s ease;
+  }
+  .grid-overlay.show{opacity:1;}
+  .hero-top{padding-top:180px;position:relative;z-index:2;}
+  .hero-coords{
+    font-size:12px;letter-spacing:.1em;color:var(--grey);text-transform:uppercase;
+    display:flex;gap:26px;margin-bottom:26px;
+  }
+  .hero h1{
+    font-size:clamp(46px,7.2vw,104px);
+    line-height:.98;
+    max-width:1080px;
+    position:relative;z-index:2;
+  }
+  .hero-bottom{
+    display:flex;justify-content:space-between;align-items:flex-end;margin-top:60px;flex-wrap:wrap;gap:30px;
+    position:relative;z-index:2;
+  }
+  .hero-bottom p{max-width:380px;font-size:16px;color:#3d403c;}
+  .hero-scroll{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);}
+
+  /* Intro strip */
+  .intro{padding:100px 40px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--paper);}
+  .intro .wrap{display:grid;grid-template-columns:200px 1fr;gap:60px;}
+  .intro .label{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--moss);font-weight:700;}
+  .intro p{font-size:clamp(22px,2.6vw,32px);font-weight:400;letter-spacing:-.01em;max-width:920px;line-height:1.35;}
+
+  /* Project index */
+  .projects{padding:110px 40px 60px;}
+  .section-head{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:50px;flex-wrap:wrap;gap:16px;}
+  .section-head h2{font-size:clamp(26px,3.2vw,38px);}
+  .section-head span{font-size:13px;color:var(--grey);}
+
+  .project-row{
+    display:grid;grid-template-columns:80px 1.2fr 1fr .8fr;gap:30px;align-items:center;
+    padding:34px 0;border-top:1px solid var(--line);
+    transition:background .25s ease;
+    cursor:pointer;
+  }
+  .project-row:last-child{border-bottom:1px solid var(--line);}
+  .project-row:hover{background:rgba(21,24,26,.03);}
+  .project-row .pyear{font-size:13px;color:var(--grey);}
+  .project-row h3{font-size:24px;}
+  .project-row .ptype{font-size:13px;color:var(--grey);}
+  .project-row .ploc{font-size:13px;color:var(--grey);text-align:right;}
+
+  .project-thumb{
+    height:0;overflow:hidden;transition:height .4s ease;
+    grid-column:1/-1;border-radius:2px;
+  }
+  .project-row.open .project-thumb{height:280px;margin-top:20px;}
+  .thumb-fill{width:100%;height:280px;border-radius:2px;position:relative;}
+  .thumb-fill::after{
+    content:'';position:absolute;inset:0;
+    background-image:linear-gradient(to right, rgba(255,255,255,.15) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,.15) 1px, transparent 1px);
+    background-size:32px 32px;
+  }
+
+  /* Philosophy band */
+  .philosophy{background:var(--ink);color:var(--concrete);padding:130px 40px;}
+  .philosophy .wrap{display:grid;grid-template-columns:1fr 1fr;gap:80px;}
+  .philosophy h2{font-size:clamp(30px,4vw,46px);color:var(--concrete);}
+  .phil-list{display:flex;flex-direction:column;gap:36px;}
+  .phil-item{border-top:1px solid rgba(237,236,232,.2);padding-top:20px;}
+  .phil-item h4{font-size:16px;margin-bottom:8px;font-weight:600;}
+  .phil-item p{font-size:14px;color:#b8b6ae;max-width:420px;}
+
+  /* Stats */
+  .stats{padding:90px 40px;border-bottom:1px solid var(--line);}
+  .stats .wrap{display:grid;grid-template-columns:repeat(4,1fr);gap:30px;}
+  .stat-num{font-size:clamp(34px,4.5vw,54px);font-weight:600;letter-spacing:-.02em;}
+  .stat-label{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--grey);margin-top:10px;}
+
+  /* CTA */
+  .cta{padding:150px 40px;text-align:center;}
+  .cta h2{font-size:clamp(32px,5vw,58px);max-width:760px;margin:0 auto 30px;}
+  .btn{
+    display:inline-block;padding:17px 38px;border:1px solid var(--ink);
+    font-size:13px;text-transform:uppercase;letter-spacing:.08em;
+    transition:background .2s, color .2s;
+  }
+  .btn:hover{background:var(--ink);color:var(--concrete);}
+
+  footer{border-top:1px solid var(--line);padding:44px 40px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:16px;font-size:13px;color:var(--grey);}
+
+  @media (max-width:900px){
+    nav{display:none;}
+    .intro .wrap{grid-template-columns:1fr;gap:20px;}
+    .project-row{grid-template-columns:50px 1fr;row-gap:6px;}
+    .project-row .ptype,.project-row .ploc{grid-column:2;text-align:left;}
+    .philosophy .wrap{grid-template-columns:1fr;gap:50px;}
+    .stats .wrap{grid-template-columns:1fr 1fr;gap:40px;}
+  }
+  :focus-visible{outline:2px solid var(--moss);outline-offset:3px;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">Halvorsen &amp; Moen</div>
+  <nav>
+    <a href="#work">Work</a>
+    <a href="#studio">Studio</a>
+    <a href="#contact">Contact</a>
+  </nav>
+</header>
+
+<section class="hero">
+  <div class="grid-overlay" id="gridOverlay"></div>
+  <div class="hero-top">
+    <div class="hero-coords"><span>60.39°N, 5.32°E</span><span>Est. 2011</span><span>Bergen — Kyoto</span></div>
+    <h1>We draw buildings<br>that listen to<br>where they stand.</h1>
+  </div>
+  <div class="hero-bottom">
+    <p>An architecture studio working between the fjord light of Norway and the quiet joinery traditions of Japan.</p>
+    <div class="hero-scroll">Scroll ↓</div>
+  </div>
+</section>
+
+<section class="intro">
+  <div class="wrap">
+    <div class="label">Approach</div>
+    <p>Every commission starts on site, not on paper — we spend a week reading the light, the wind, the sound of a place before a single line is drawn.</p>
+  </div>
+</section>
+
+<section class="projects" id="work">
+  <div class="section-head">
+    <h2>Selected work</h2>
+    <span>2016 — 2026</span>
+  </div>
+
+  <div class="project-row" data-color="linear-gradient(135deg,#4b5d45,#8a9a80)">
+    <div class="pyear">2025</div>
+    <h3>Kirkeflaten House</h3>
+    <div class="ptype">Private residence</div>
+    <div class="ploc">Bergen, NO</div>
+    <div class="project-thumb"><div class="thumb-fill" style="background:linear-gradient(135deg,#4b5d45,#8a9a80)"></div></div>
+  </div>
+  <div class="project-row" data-color="linear-gradient(135deg,#7a6a52,#c9b98e)">
+    <div class="pyear">2024</div>
+    <h3>Nishiki Tea Pavilion</h3>
+    <div class="ptype">Cultural / tearoom</div>
+    <div class="ploc">Kyoto, JP</div>
+    <div class="project-thumb"><div class="thumb-fill" style="background:linear-gradient(135deg,#7a6a52,#c9b98e)"></div></div>
+  </div>
+  <div class="project-row" data-color="linear-gradient(135deg,#2b3a44,#5c7b8a)">
+    <div class="pyear">2023</div>
+    <h3>Sildevik Library</h3>
+    <div class="ptype">Public / civic</div>
+    <div class="ploc">Ålesund, NO</div>
+    <div class="project-thumb"><div class="thumb-fill" style="background:linear-gradient(135deg,#2b3a44,#5c7b8a)"></div></div>
+  </div>
+  <div class="project-row" data-color="linear-gradient(135deg,#4a4038,#8a7a68)">
+    <div class="pyear">2021</div>
+    <h3>Osterøy Timber Studio</h3>
+    <div class="ptype">Workshop / studio</div>
+    <div class="ploc">Osterøy, NO</div>
+    <div class="project-thumb"><div class="thumb-fill" style="background:linear-gradient(135deg,#4a4038,#8a7a68)"></div></div>
+  </div>
+</section>
+
+<section class="stats">
+  <div class="wrap">
+    <div><div class="stat-num">38</div><div class="stat-label">Completed projects</div></div>
+    <div><div class="stat-num">6</div><div class="stat-label">International awards</div></div>
+    <div><div class="stat-num">12</div><div class="stat-label">Studio members</div></div>
+    <div><div class="stat-num">2</div><div class="stat-label">Studios — Bergen &amp; Kyoto</div></div>
+  </div>
+</section>
+
+<section class="philosophy" id="studio">
+  <div class="wrap">
+    <h2>Three things every project shares, regardless of scale.</h2>
+    <div class="phil-list">
+      <div class="phil-item"><h4>Material honesty</h4><p>Timber reads as timber, concrete as concrete. We rarely finish over what a material can say on its own.</p></div>
+      <div class="phil-item"><h4>Long daylight studies</h4><p>Every scheme is modeled through a full year of sun before it's approved for construction.</p></div>
+      <div class="phil-item"><h4>Joinery over adhesive</h4><p>Where we can detail a joint instead of a seam, we do — buildings should be repairable, not disposable.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="cta" id="contact">
+  <h2>Have a site in mind? We'd like to walk it with you.</h2>
+  <a class="btn" href="#">Start a conversation →</a>
+</section>
+
+<footer>
+  <div>Halvorsen &amp; Moen Arkitekter — Bergen · Kyoto</div>
+  <div>Instagram · LinkedIn · post@halvorsenmoen.no</div>
+</footer>
+
+<script>
+  const gridOverlay = document.getElementById('gridOverlay');
+  window.addEventListener('load', () => setTimeout(() => gridOverlay.classList.add('show'), 300));
+
+  document.querySelectorAll('.project-row').forEach(row => {
+    row.addEventListener('click', () => {
+      const wasOpen = row.classList.contains('open');
+      document.querySelectorAll('.project-row').forEach(r => r.classList.remove('open'));
+      if(!wasOpen) row.classList.add('open');
+    });
+  });
+</script>
+
+</body>
+</html>

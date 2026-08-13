@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ember &amp; Fog — Coastal Coffee Roastery</title>
+<style>
+  :root{
+    --parchment:#EFE6D8;
+    --charcoal:#2B241E;
+    --oxide:#A8471F;
+    --sage:#5C6B54;
+    --line:#D9CBB2;
+    --paper:#F7F1E6;
+    --display: 'Roast Display', Georgia, 'Times New Roman', serif;
+    --body: 'Roast Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--parchment);
+    color:var(--charcoal);
+    font-family:var(--body);
+    -webkit-font-smoothing:antialiased;
+    line-height:1.5;
+    overflow-x:hidden;
+  }
+  a{color:inherit;text-decoration:none;}
+  img{max-width:100%;display:block;}
+
+  /* Condensed serif display via font-stretch fallback */
+  h1,h2,h3,.display{
+    font-family: Georgia, 'Times New Roman', serif;
+    font-stretch: condensed;
+    letter-spacing:-0.01em;
+    font-weight:700;
+  }
+
+  .wrap{max-width:1180px;margin:0 auto;padding:0 32px;}
+
+  /* Header */
+  header{
+    position:fixed;top:0;left:0;right:0;z-index:100;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:22px 32px;
+    mix-blend-mode:normal;
+    transition:background .3s ease, box-shadow .3s ease;
+  }
+  header.scrolled{background:rgba(239,230,216,.92);backdrop-filter:blur(6px);box-shadow:0 1px 0 var(--line);}
+  .brand{font-family:Georgia,serif;font-weight:700;font-size:20px;letter-spacing:.02em;}
+  .brand span{color:var(--oxide);}
+  nav{display:flex;gap:36px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;}
+  nav a{opacity:.75;transition:opacity .2s;}
+  nav a:hover{opacity:1;}
+  .nav-toggle{display:none;background:none;border:none;font-size:22px;cursor:pointer;color:var(--charcoal);}
+
+  /* Hero */
+  .hero{
+    min-height:100vh;
+    display:flex;flex-direction:column;justify-content:center;
+    padding:140px 32px 80px;
+    position:relative;
+  }
+  .hero-eyebrow{
+    font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--oxide);
+    margin-bottom:22px;font-weight:600;
+  }
+  .hero h1{
+    font-size:clamp(48px,8vw,108px);
+    line-height:.92;
+    max-width:920px;
+  }
+  .hero h1 em{font-style:italic;color:var(--oxide);}
+  .hero-sub{
+    margin-top:28px;max-width:480px;font-size:17px;color:#524738;
+  }
+  .hero-meta{
+    margin-top:56px;display:flex;gap:56px;flex-wrap:wrap;
+  }
+  .hero-meta div{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#7a6d59;}
+  .hero-meta strong{display:block;font-family:Georgia,serif;font-size:22px;color:var(--charcoal);text-transform:none;letter-spacing:0;margin-top:4px;}
+
+  /* Roast curve — signature element */
+  .roast-curve-section{
+    padding:90px 32px 120px;background:var(--paper);
+    border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+  }
+  .rc-head{max-width:640px;margin:0 auto 50px;text-align:center;}
+  .rc-head h2{font-size:clamp(30px,4vw,44px);}
+  .rc-head p{margin-top:14px;color:#5a5040;font-size:15px;}
+  .rc-chart-wrap{max-width:980px;margin:0 auto;position:relative;}
+  svg#roastChart{width:100%;height:auto;display:block;}
+  .rc-path{
+    fill:none;stroke:var(--oxide);stroke-width:2.5;
+    stroke-dasharray:1400;stroke-dashoffset:1400;
+    transition:stroke-dashoffset 1.4s ease;
+  }
+  .rc-path.animate{stroke-dashoffset:0;}
+  .rc-dot{fill:var(--charcoal);opacity:0;transition:opacity .3s ease .8s;}
+  .rc-dot.animate{opacity:1;}
+  .rc-label{font-size:11px;letter-spacing:.06em;text-transform:uppercase;fill:#7a6d59;font-family:var(--body);}
+  .rc-phase-label{font-size:13px;fill:var(--charcoal);font-family:Georgia,serif;font-style:italic;}
+  .rc-grid line{stroke:var(--line);stroke-width:1;}
+  .rc-stage-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);margin-top:56px;border:1px solid var(--line);}
+  .rc-stage-cards div{background:var(--paper);padding:26px 22px;}
+  .rc-stage-cards .n{font-size:11px;letter-spacing:.1em;color:var(--oxide);text-transform:uppercase;font-weight:600;}
+  .rc-stage-cards h4{font-family:Georgia,serif;font-size:19px;margin:10px 0 8px;}
+  .rc-stage-cards p{font-size:13.5px;color:#5a5040;}
+
+  /* Origins */
+  .origins{padding:120px 32px;}
+  .origins-head{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:60px;flex-wrap:wrap;gap:20px;}
+  .origins-head h2{font-size:clamp(30px,4vw,44px);max-width:520px;}
+  .origins-head p{max-width:340px;color:#5a5040;font-size:14.5px;}
+  .origin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;}
+  .origin-card{border-top:2px solid var(--charcoal);padding-top:20px;}
+  .origin-swatch{height:220px;border-radius:2px;margin-bottom:18px;position:relative;overflow:hidden;}
+  .origin-swatch::after{content:'';position:absolute;inset:0;background:linear-gradient(160deg,rgba(43,36,30,0) 40%, rgba(43,36,30,.25));}
+  .origin-card h3{font-size:22px;margin-bottom:6px;}
+  .origin-card .tag{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--sage);font-weight:600;margin-bottom:10px;}
+  .origin-card p{font-size:14px;color:#5a5040;}
+
+  /* Process band */
+  .process{background:var(--charcoal);color:var(--parchment);padding:120px 32px;}
+  .process .wrap{display:grid;grid-template-columns:.9fr 1.1fr;gap:80px;}
+  .process h2{font-size:clamp(30px,4vw,44px);color:var(--parchment);max-width:420px;}
+  .process-steps{display:flex;flex-direction:column;gap:0;}
+  .pstep{padding:26px 0;border-bottom:1px solid rgba(239,230,216,.15);display:grid;grid-template-columns:56px 1fr;gap:20px;}
+  .pstep:first-child{border-top:1px solid rgba(239,230,216,.15);}
+  .pstep .idx{font-family:Georgia,serif;font-style:italic;color:var(--oxide);font-size:15px;}
+  .pstep h4{font-size:17px;margin-bottom:6px;}
+  .pstep p{font-size:14px;color:#c9bfa9;max-width:440px;}
+
+  /* CTA */
+  .cta{padding:140px 32px;text-align:center;}
+  .cta h2{font-size:clamp(34px,5.5vw,64px);max-width:760px;margin:0 auto 28px;}
+  .cta p{max-width:440px;margin:0 auto 40px;color:#5a5040;}
+  .btn{
+    display:inline-flex;align-items:center;gap:10px;
+    background:var(--charcoal);color:var(--parchment);
+    padding:16px 34px;border-radius:2px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;
+    transition:background .2s;border:1px solid var(--charcoal);
+  }
+  .btn:hover{background:transparent;color:var(--charcoal);}
+
+  footer{border-top:1px solid var(--line);padding:50px 32px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:20px;font-size:13px;color:#7a6d59;}
+
+  @media (max-width:860px){
+    nav{display:none;}
+    .nav-toggle{display:block;}
+    .process .wrap{grid-template-columns:1fr;gap:40px;}
+    .origin-grid{grid-template-columns:1fr;}
+    .rc-stage-cards{grid-template-columns:1fr 1fr;}
+  }
+  @media (max-width:520px){
+    .rc-stage-cards{grid-template-columns:1fr;}
+    .hero-meta{gap:32px;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+    .rc-path,.rc-dot{transition:none;}
+  }
+  :focus-visible{outline:2px solid var(--oxide);outline-offset:3px;}
+</style>
+</head>
+<body>
+
+<header id="siteHeader">
+  <div class="brand">Ember <span>&amp;</span> Fog</div>
+  <nav>
+    <a href="#curve">The Roast</a>
+    <a href="#origins">Origins</a>
+    <a href="#process">Process</a>
+    <a href="#cta">Visit</a>
+  </nav>
+  <button class="nav-toggle" aria-label="Menu">☰</button>
+</header>
+
+<section class="hero">
+  <div class="hero-eyebrow">Small-batch roastery — Half Moon Bay</div>
+  <h1>Coffee, roasted<br>where the <em>fog</em><br>meets the coast.</h1>
+  <p class="hero-sub">We chart every roast by hand, logging temperature every fifteen seconds from first crack to drop, so the cup tastes the way the farmer intended.</p>
+  <div class="hero-meta">
+    <div>Founded<strong>2016</strong></div>
+    <div>Roasted weekly<strong>~180 kg</strong></div>
+    <div>Origins sourced<strong>11 countries</strong></div>
+  </div>
+</section>
+
+<section class="roast-curve-section" id="curve">
+  <div class="rc-head">
+    <h2>Every bag traces a curve.</h2>
+    <p>This is the actual profile for our Guji Natural — 9 minutes, 42 seconds, drum temperature tracked from charge to drop.</p>
+  </div>
+  <div class="rc-chart-wrap">
+    <svg id="roastChart" viewBox="0 0 900 380" role="img" aria-label="Roast temperature curve from charge to drop">
+      <g class="rc-grid">
+        <line x1="60" y1="60" x2="60" y2="320"></line>
+        <line x1="60" y1="320" x2="860" y2="320"></line>
+        <line x1="60" y1="220" x2="860" y2="220" stroke-dasharray="2 5"></line>
+        <line x1="60" y1="120" x2="860" y2="120" stroke-dasharray="2 5"></line>
+      </g>
+      <text x="30" y="325" class="rc-label">200°F</text>
+      <text x="30" y="225" class="rc-label">320°F</text>
+      <text x="30" y="125" class="rc-label">420°F</text>
+
+      <text x="140" y="345" class="rc-label">CHARGE</text>
+      <text x="330" y="345" class="rc-label">TURNING PT.</text>
+      <text x="560" y="345" class="rc-label">FIRST CRACK</text>
+      <text x="760" y="345" class="rc-label">DROP</text>
+
+      <path class="rc-path" id="rcPath" d="M100,300 C160,318 210,310 260,270 C330,215 400,150 480,120 C560,95 640,80 720,66 C780,56 820,50 840,46"></path>
+
+      <circle class="rc-dot" cx="100" cy="300" r="4"></circle>
+      <circle class="rc-dot" cx="260" cy="270" r="4"></circle>
+      <circle class="rc-dot" cx="560" cy="98" r="4"></circle>
+      <circle class="rc-dot" cx="840" cy="46" r="4"></circle>
+
+      <text x="565" y="80" class="rc-phase-label">9:04 — first crack</text>
+    </svg>
+  </div>
+  <div class="rc-stage-cards">
+    <div><div class="n">01</div><h4>Charge</h4><p>Green beans drop into a 400°F drum; temperature dips as they absorb heat.</p></div>
+    <div><div class="n">02</div><h4>Drying</h4><p>Moisture evaporates. Beans turn from grassy green to pale yellow.</p></div>
+    <div><div class="n">03</div><h4>First Crack</h4><p>Sugars caramelize audibly. This is where flavor development truly begins.</p></div>
+    <div><div class="n">04</div><h4>Drop</h4><p>Beans hit the cooling tray the instant they reach our target curve.</p></div>
+  </div>
+</section>
+
+<section class="origins" id="origins">
+  <div class="origins-head">
+    <h2>Three lots we're pouring this month.</h2>
+    <p>Sourced direct through relationships we've held for years, not brokered on volume.</p>
+  </div>
+  <div class="origin-grid">
+    <div class="origin-card">
+      <div class="origin-swatch" style="background:linear-gradient(135deg,#8a5a3a,#c99b6b)"></div>
+      <div class="tag">Ethiopia · Guji</div>
+      <h3>Uraga Natural</h3>
+      <p>Blueberry, dark honey, a long floral finish. Dried on raised beds for 21 days.</p>
+    </div>
+    <div class="origin-card">
+      <div class="origin-swatch" style="background:linear-gradient(135deg,#5c6b54,#9aa88f)"></div>
+      <div class="tag">Colombia · Huila</div>
+      <h3>Finca El Mirador</h3>
+      <p>Red apple, brown sugar, soft acidity. Washed and patio-dried at 1,850m.</p>
+    </div>
+    <div class="origin-card">
+      <div class="origin-swatch" style="background:linear-gradient(135deg,#3d3128,#a8471f)"></div>
+      <div class="tag">Sumatra · Aceh</div>
+      <h3>Gayo Wet-Hulled</h3>
+      <p>Cedar, dark chocolate, low acid and heavy body. A house favorite since day one.</p>
+    </div>
+  </div>
+</section>
+
+<section class="process" id="process">
+  <div class="wrap">
+    <h2>From cherry to cup, we track it all.</h2>
+    <div class="process-steps">
+      <div class="pstep"><div class="idx">i.</div><div><h4>Cupping &amp; selection</h4><p>Every incoming lot is cupped blind against three references before it's approved.</p></div></div>
+      <div class="pstep"><div class="idx">ii.</div><div><h4>Profile roasting</h4><p>Each origin gets its own logged curve, tuned in a test roast before the full batch.</p></div></div>
+      <div class="pstep"><div class="idx">iii.</div><div><h4>Rest &amp; degas</h4><p>Beans rest a minimum of 5 days, releasing CO₂ before they're sealed.</p></div></div>
+      <div class="pstep"><div class="idx">iv.</div><div><h4>Bag &amp; ship</h4><p>Packed within 48 hours of your order, never off a warehouse shelf.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="cta" id="cta">
+  <h2>Come sit in the fog with a cup.</h2>
+  <p>Our tasting room is open Thursday through Monday, 8am–3pm, right on the harbor.</p>
+  <a class="btn" href="#">Plan your visit →</a>
+</section>
+
+<footer>
+  <div>Ember &amp; Fog Roastery — Half Moon Bay, CA</div>
+  <div>Journal · Wholesale · Contact</div>
+</footer>
+
+<script>
+  const header = document.getElementById('siteHeader');
+  window.addEventListener('scroll', () => {
+    header.classList.toggle('scrolled', window.scrollY > 20);
+  });
+
+  const path = document.getElementById('rcPath');
+  const dots = document.querySelectorAll('.rc-dot');
+  const chartSection = document.getElementById('curve');
+  let animated = false;
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if(e.isIntersecting && !animated){
+        animated = true;
+        path.classList.add('animate');
+        dots.forEach(d => d.classList.add('animate'));
+      }
+    });
+  }, {threshold:0.4});
+  io.observe(chartSection);
+</script>
+
+</body>
+</html>
