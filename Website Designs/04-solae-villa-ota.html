@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solae — Private Villas, Booked Directly</title>
+<style>
+  :root{
+    --teal:#123B3B;
+    --teal-deep:#0B2626;
+    --sand:#EFE4CC;
+    --sand-pale:#F8F3E6;
+    --brass:#B8874F;
+    --ink:#1A211E;
+    --line:#DCD0AF;
+    --line-dark:rgba(239,228,204,.18);
+    --grey:#6E6A5D;
+    --coral:#C1613F;
+    --display:'Iowan Old Style','Palatino Linotype',Georgia,serif;
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--sand-pale);color:var(--ink);font-family:var(--sans);
+    line-height:1.5;-webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit;text-decoration:none;}
+  button{font-family:inherit;cursor:pointer;}
+  h1,h2,h3{font-family:var(--display);font-weight:400;letter-spacing:-0.01em;}
+  .wrap{max-width:1240px;margin:0 auto;padding:0 32px;}
+  img{max-width:100%;display:block;}
+
+  /* Header */
+  header{
+    position:fixed;top:0;left:0;right:0;z-index:200;
+    display:flex;justify-content:space-between;align-items:center;
+    padding:20px 32px;
+    background:rgba(248,243,230,.9);backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);
+    transition:transform .3s ease;
+  }
+  .brand{font-family:var(--display);font-size:23px;letter-spacing:.01em;color:var(--teal);}
+  nav{display:flex;gap:32px;font-size:14px;color:var(--ink);}
+  nav a{opacity:.75;transition:opacity .2s;}
+  nav a:hover{opacity:1;}
+  .hdr-right{display:flex;gap:14px;align-items:center;}
+  .btn{
+    padding:11px 22px;border-radius:24px;font-size:13.5px;font-weight:600;
+    border:1px solid var(--teal);transition:all .2s ease;
+  }
+  .btn.solid{background:var(--teal);color:var(--sand-pale);}
+  .btn.solid:hover{background:var(--teal-deep);}
+  .btn.ghost{border-color:transparent;color:var(--ink);}
+  .btn.ghost:hover{border-color:var(--line);}
+
+  /* Hero */
+  .hero{
+    min-height:92vh;position:relative;display:flex;flex-direction:column;justify-content:center;
+    padding:150px 32px 60px;
+    background:
+      radial-gradient(ellipse 900px 500px at 80% 15%, rgba(184,135,79,.18), transparent 60%),
+      linear-gradient(180deg, var(--teal) 0%, var(--teal-deep) 100%);
+    color:var(--sand-pale);overflow:hidden;
+  }
+  .hero::after{
+    content:'';position:absolute;left:0;right:0;bottom:0;height:140px;
+    background:radial-gradient(ellipse 1200px 200px at 50% 100%, rgba(239,228,204,.12), transparent 70%);
+  }
+  .hero-eyebrow{font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--sand);opacity:.75;margin-bottom:22px;}
+  .hero h1{font-size:clamp(40px,6.4vw,78px);line-height:1.04;max-width:760px;color:var(--sand-pale);}
+  .hero h1 em{font-style:italic;color:var(--brass);}
+  .hero p{margin-top:22px;max-width:440px;font-size:16.5px;color:rgba(239,228,204,.8);}
+
+  /* Search widget */
+  .search-widget{
+    margin-top:48px;background:var(--sand-pale);border-radius:16px;
+    padding:10px;display:grid;grid-template-columns:1.3fr 1fr 1fr 1fr auto;gap:2px;
+    box-shadow:0 30px 60px -20px rgba(0,0,0,.45);position:relative;z-index:5;
+    max-width:920px;
+  }
+  .sf{padding:14px 18px;border-radius:10px;position:relative;transition:background .15s;}
+  .sf:hover{background:rgba(18,59,59,.05);}
+  .sf label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--grey);margin-bottom:4px;font-weight:600;}
+  .sf select, .sf input{
+    border:none;background:none;font-family:inherit;font-size:14.5px;color:var(--ink);width:100%;padding:0;
+    -webkit-appearance:none;appearance:none;
+  }
+  .sf select:focus, .sf input:focus{outline:none;}
+  .guest-counter{display:flex;align-items:center;gap:10px;}
+  .guest-counter span{font-size:14.5px;min-width:14px;text-align:center;}
+  .gc-btn{
+    width:22px;height:22px;border-radius:50%;border:1px solid var(--line);background:none;
+    display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--teal);line-height:1;
+  }
+  .gc-btn:hover{background:var(--sand);}
+  .search-btn{
+    background:var(--brass);color:var(--sand-pale);border:none;border-radius:10px;
+    padding:0 26px;font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px;
+    transition:background .2s;
+  }
+  .search-btn:hover{background:#a3743e;}
+
+  .hero-chips{display:flex;gap:10px;margin-top:24px;flex-wrap:wrap;}
+  .chip{
+    font-size:12.5px;padding:7px 14px;border-radius:20px;border:1px solid rgba(239,228,204,.35);
+    color:rgba(239,228,204,.85);
+  }
+
+  /* Trust strip */
+  .trust{padding:44px 32px;border-bottom:1px solid var(--line);}
+  .trust .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:24px;}
+  .trust-item{display:flex;align-items:center;gap:10px;font-size:13.5px;color:var(--grey);}
+  .trust-item strong{color:var(--ink);font-family:var(--display);font-size:16px;font-weight:600;}
+
+  /* Listings */
+  .listings{padding:110px 32px 40px;}
+  .section-head{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:44px;flex-wrap:wrap;gap:18px;}
+  .section-head h2{font-size:clamp(28px,3.6vw,42px);}
+  .section-head p{color:var(--grey);font-size:14.5px;max-width:360px;}
+
+  .filter-bar{display:flex;gap:10px;margin-bottom:40px;flex-wrap:wrap;}
+  .filter-chip{
+    padding:9px 18px;border-radius:20px;border:1px solid var(--line);font-size:13px;background:var(--sand-pale);
+    transition:all .18s ease;color:var(--ink);
+  }
+  .filter-chip.active{background:var(--teal);color:var(--sand-pale);border-color:var(--teal);}
+  .filter-chip:hover:not(.active){border-color:var(--brass);}
+
+  .villa-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;}
+  .villa-card{
+    border-radius:14px;overflow:hidden;background:#fff;border:1px solid var(--line);
+    transition:transform .25s ease, box-shadow .25s ease;
+    display:flex;flex-direction:column;
+  }
+  .villa-card:hover{transform:translateY(-4px);box-shadow:0 24px 44px -18px rgba(18,59,59,.25);}
+  .villa-photo{height:220px;position:relative;}
+  .villa-photo::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 55%,rgba(0,0,0,.35));}
+  .villa-badge{
+    position:absolute;top:14px;left:14px;z-index:2;background:rgba(248,243,230,.92);
+    padding:5px 12px;border-radius:20px;font-size:11.5px;font-weight:700;color:var(--teal);
+  }
+  .villa-heart{
+    position:absolute;top:14px;right:14px;z-index:2;width:32px;height:32px;border-radius:50%;
+    background:rgba(26,33,30,.35);color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;
+    border:none;transition:background .2s;
+  }
+  .villa-heart:hover{background:rgba(26,33,30,.55);}
+  .villa-heart.saved{color:var(--coral);}
+  .villa-info{padding:20px 20px 22px;flex:1;display:flex;flex-direction:column;}
+  .villa-loc{font-size:12px;color:var(--grey);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;}
+  .villa-name{font-size:19px;margin-bottom:8px;}
+  .villa-meta{font-size:13px;color:var(--grey);margin-bottom:14px;}
+  .villa-rating{display:flex;align-items:center;gap:6px;font-size:13px;margin-bottom:16px;}
+  .villa-rating .stars{color:var(--brass);}
+  .villa-foot{display:flex;justify-content:space-between;align-items:baseline;margin-top:auto;}
+  .villa-price{font-family:var(--display);font-size:20px;color:var(--teal);}
+  .villa-price span{font-family:var(--sans);font-size:12.5px;color:var(--grey);font-weight:400;}
+
+  .load-more{display:flex;justify-content:center;margin-top:48px;}
+
+  /* Rate chart — signature element */
+  .rates{padding:120px 32px;background:var(--teal);color:var(--sand-pale);position:relative;overflow:hidden;}
+  .rates-head{max-width:600px;margin:0 auto 50px;text-align:center;}
+  .rates-head h2{font-size:clamp(28px,3.8vw,42px);color:var(--sand-pale);}
+  .rates-head p{margin-top:14px;color:rgba(239,228,204,.75);font-size:15px;}
+  .rate-chart-wrap{max-width:1000px;margin:0 auto;position:relative;}
+  svg#rateChart{width:100%;height:auto;display:block;}
+  .rc-area{fill:url(#rateGrad);opacity:0;transition:opacity 1s ease;}
+  .rc-area.show{opacity:1;}
+  .rc-line{fill:none;stroke:var(--brass);stroke-width:2;stroke-dasharray:1600;stroke-dashoffset:1600;transition:stroke-dashoffset 1.6s ease;}
+  .rc-line.show{stroke-dashoffset:0;}
+  .rc-pt{fill:var(--sand-pale);stroke:var(--brass);stroke-width:2;cursor:pointer;transition:r .15s ease;}
+  .rc-pt:hover, .rc-pt.hovered{r:6;}
+  .rc-month-label{font-size:11px;fill:rgba(239,228,204,.55);font-family:var(--sans);text-transform:uppercase;letter-spacing:.05em;}
+  .rc-tooltip{
+    position:absolute;background:var(--sand-pale);color:var(--ink);padding:10px 14px;border-radius:8px;
+    font-size:13px;pointer-events:none;opacity:0;transition:opacity .15s ease;transform:translate(-50%,-115%);
+    box-shadow:0 10px 24px rgba(0,0,0,.25);white-space:nowrap;z-index:5;
+  }
+  .rc-tooltip strong{display:block;font-family:var(--display);font-size:15px;color:var(--teal);}
+  .rc-tooltip span{font-size:11.5px;color:var(--grey);}
+  .rate-legend{display:flex;justify-content:center;gap:28px;margin-top:36px;font-size:13px;color:rgba(239,228,204,.7);}
+  .rate-legend span{display:inline-flex;align-items:center;gap:8px;}
+  .dotmark{width:8px;height:8px;border-radius:50%;background:var(--brass);}
+
+  /* How it works */
+  .how{padding:120px 32px;}
+  .how .wrap{display:grid;grid-template-columns:1fr 1fr;gap:70px;align-items:center;}
+  .how h2{font-size:clamp(28px,3.8vw,42px);max-width:440px;}
+  .how-steps{display:flex;flex-direction:column;gap:0;}
+  .how-step{display:grid;grid-template-columns:44px 1fr;gap:18px;padding:24px 0;border-top:1px solid var(--line);}
+  .how-step:last-child{border-bottom:1px solid var(--line);}
+  .how-step .n{font-family:var(--display);font-size:20px;color:var(--brass);}
+  .how-step h4{font-size:16px;margin-bottom:6px;font-family:var(--sans);font-weight:700;}
+  .how-step p{font-size:13.5px;color:var(--grey);max-width:400px;}
+
+  /* Testimonial */
+  .testimonial{padding:100px 32px;background:var(--sand);text-align:center;}
+  .testimonial blockquote{
+    font-family:var(--display);font-size:clamp(22px,3vw,32px);max-width:760px;margin:0 auto 24px;line-height:1.4;font-style:italic;color:var(--teal-deep);
+  }
+  .testimonial cite{font-size:13.5px;color:var(--grey);font-style:normal;}
+
+  /* CTA */
+  .cta{padding:140px 32px;text-align:center;}
+  .cta h2{font-size:clamp(32px,5vw,56px);max-width:700px;margin:0 auto 26px;}
+  .cta p{color:var(--grey);max-width:420px;margin:0 auto 34px;}
+
+  footer{border-top:1px solid var(--line);padding:56px 32px 40px;background:var(--sand-pale);}
+  footer .wrap{display:grid;grid-template-columns:1.3fr repeat(3,1fr);gap:40px;}
+  footer h5{font-size:12.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--grey);margin-bottom:16px;}
+  footer li{list-style:none;margin-bottom:10px;font-size:13.5px;}
+  footer li a:hover{color:var(--brass);}
+  .footer-bottom{max-width:1240px;margin:50px auto 0;padding:24px 32px 0;border-top:1px solid var(--line);display:flex;justify-content:space-between;font-size:12.5px;color:var(--grey);flex-wrap:wrap;gap:10px;}
+
+  @media (max-width:980px){
+    nav{display:none;}
+    .search-widget{grid-template-columns:1fr 1fr;grid-template-rows:auto auto auto;}
+    .search-btn{grid-column:1/-1;padding:14px;justify-content:center;}
+    .villa-grid{grid-template-columns:1fr 1fr;}
+    .how .wrap{grid-template-columns:1fr;gap:36px;}
+    footer .wrap{grid-template-columns:1fr 1fr;}
+  }
+  @media (max-width:640px){
+    .villa-grid{grid-template-columns:1fr;}
+    .search-widget{grid-template-columns:1fr;}
+    footer .wrap{grid-template-columns:1fr;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto;}
+    .rc-area,.rc-line{transition:none;}
+  }
+  :focus-visible{outline:2px solid var(--brass);outline-offset:3px;}
+</style>
+</head>
+<body>
+
+<header id="siteHeader">
+  <div class="brand">Solae</div>
+  <nav>
+    <a href="#listings">Villas</a>
+    <a href="#rates">Availability</a>
+    <a href="#how">How it works</a>
+    <a href="#">Become a host</a>
+  </nav>
+  <div class="hdr-right">
+    <a class="btn ghost" href="#">Log in</a>
+    <a class="btn solid" href="#listings">Find a villa</a>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap" style="width:100%;">
+    <div class="hero-eyebrow">Private-pool villas only — no hotels, no apartments</div>
+    <h1>One kind of stay.<br>Booked <em>directly</em>,<br>done properly.</h1>
+    <p>Solae lists nothing but standalone villas with private pools, verified in person before they ever go live.</p>
+
+    <div class="search-widget">
+      <div class="sf">
+        <label for="dest">Destination</label>
+        <select id="dest">
+          <option>Uluwatu, Bali</option>
+          <option>Seminyak, Bali</option>
+          <option>Ubud, Bali</option>
+          <option>Amalfi Coast, Italy</option>
+          <option>Santorini, Greece</option>
+          <option>Tulum, Mexico</option>
+        </select>
+      </div>
+      <div class="sf">
+        <label for="checkin">Check in</label>
+        <input type="date" id="checkin" value="2026-09-14">
+      </div>
+      <div class="sf">
+        <label for="checkout">Check out</label>
+        <input type="date" id="checkout" value="2026-09-19">
+      </div>
+      <div class="sf">
+        <label>Guests</label>
+        <div class="guest-counter">
+          <button class="gc-btn" id="gcMinus" aria-label="Decrease guests">–</button>
+          <span id="gcValue">4</span>
+          <button class="gc-btn" id="gcPlus" aria-label="Increase guests">+</button>
+        </div>
+      </div>
+      <button class="search-btn" id="searchBtn">Search →</button>
+    </div>
+
+    <div class="hero-chips">
+      <span class="chip">Private pool, always</span>
+      <span class="chip">Verified in person</span>
+      <span class="chip">Free cancellation, 48h</span>
+    </div>
+  </div>
+</section>
+
+<section class="trust">
+  <div class="wrap">
+    <div class="trust-item"><strong>2,140</strong>&nbsp;villas listed, worldwide</div>
+    <div class="trust-item"><strong>4.91</strong>&nbsp;average guest rating</div>
+    <div class="trust-item"><strong>100%</strong>&nbsp;in-person verified before listing</div>
+    <div class="trust-item"><strong>0%</strong>&nbsp;hidden booking fees</div>
+  </div>
+</section>
+
+<section class="listings" id="listings">
+  <div class="section-head">
+    <div>
+      <h2>Villas open for September</h2>
+      <p>Every listing below has a private pool and comes with a dedicated host, on call for your stay.</p>
+    </div>
+  </div>
+
+  <div class="filter-bar">
+    <button class="filter-chip active" data-filter="all">All villas</button>
+    <button class="filter-chip" data-filter="beachfront">Beachfront</button>
+    <button class="filter-chip" data-filter="cliff">Cliffside</button>
+    <button class="filter-chip" data-filter="jungle">Jungle-set</button>
+    <button class="filter-chip" data-filter="large">6+ guests</button>
+  </div>
+
+  <div class="villa-grid" id="villaGrid">
+    <!-- cards injected by JS -->
+  </div>
+
+  <div class="load-more">
+    <button class="btn ghost" style="border-color:var(--line);">Show more villas</button>
+  </div>
+</section>
+
+<section class="rates" id="rates">
+  <div class="rates-head">
+    <h2>Nightly rates ebb and flow with the season.</h2>
+    <p>Hover any point to see the exact rate and how many villas are still open that week.</p>
+  </div>
+  <div class="rate-chart-wrap" id="rateChartWrap">
+    <svg id="rateChart" viewBox="0 0 1000 320" role="img" aria-label="Villa nightly rate chart across the year">
+      <defs>
+        <linearGradient id="rateGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#B8874F" stop-opacity="0.35"/>
+          <stop offset="100%" stop-color="#B8874F" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <line x1="40" y1="260" x2="970" y2="260" stroke="rgba(239,228,204,.2)"></line>
+      <path class="rc-area" id="rcArea" d="M40,220 C110,235 170,245 230,190 C300,130 370,90 440,80 C510,72 580,70 640,95 C710,125 780,170 850,205 C900,225 940,235 970,230 L970,260 L40,260 Z"></path>
+      <path class="rc-line" id="rcLine" d="M40,220 C110,235 170,245 230,190 C300,130 370,90 440,80 C510,72 580,70 640,95 C710,125 780,170 850,205 C900,225 940,235 970,230"></path>
+
+      <g id="rcPoints"></g>
+
+      <text x="40" y="285" class="rc-month-label">Jan</text>
+      <text x="190" y="285" class="rc-month-label">Mar</text>
+      <text x="350" y="285" class="rc-month-label">May</text>
+      <text x="510" y="285" class="rc-month-label">Jul</text>
+      <text x="670" y="285" class="rc-month-label">Sep</text>
+      <text x="830" y="285" class="rc-month-label">Nov</text>
+    </svg>
+    <div class="rc-tooltip" id="rcTooltip"><strong id="rcPrice">$—</strong><span id="rcAvail">— villas open</span></div>
+  </div>
+  <div class="rate-legend">
+    <span><span class="dotmark"></span>Average nightly rate, 4-bedroom villa</span>
+  </div>
+</section>
+
+<section class="how" id="how">
+  <div class="wrap">
+    <h2>Booking direct means fewer surprises.</h2>
+    <div class="how-steps">
+      <div class="how-step"><div class="n">1</div><div><h4>Search one destination at a time</h4><p>Pick a place, dates, and party size — we only ever show villas that are actually free.</p></div></div>
+      <div class="how-step"><div class="n">2</div><div><h4>Message the host directly</h4><p>Ask about the pool heater or a late check-in before you commit to anything.</p></div></div>
+      <div class="how-step"><div class="n">3</div><div><h4>Pay in two installments</h4><p>25% to hold the villa, the balance 14 days out — no surprise fees added at checkout.</p></div></div>
+      <div class="how-step"><div class="n">4</div><div><h4>Arrive to a verified stay</h4><p>Every villa is inspected by our team in person within the last 12 months.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="testimonial">
+  <blockquote>"We've booked four villas through Solae now — every single photo matched the actual house. That's rarer than it should be."</blockquote>
+  <cite>— Margit H., booked Villa Alang-Alang, Uluwatu</cite>
+</section>
+
+<section class="cta">
+  <h2>Your villa is waiting for the right dates.</h2>
+  <p>Set a destination and we'll hold your favorites for 24 hours while you decide.</p>
+  <a class="btn solid" href="#listings" style="padding:15px 32px;">Start searching →</a>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div>
+      <div class="brand" style="margin-bottom:14px;">Solae</div>
+      <p style="font-size:13.5px;color:var(--grey);max-width:260px;">The booking platform for private-pool villas, and nothing else.</p>
+    </div>
+    <div>
+      <h5>Explore</h5>
+      <ul><li><a href="#">Bali</a></li><li><a href="#">Amalfi Coast</a></li><li><a href="#">Santorini</a></li><li><a href="#">Tulum</a></li></ul>
+    </div>
+    <div>
+      <h5>Company</h5>
+      <ul><li><a href="#">About Solae</a></li><li><a href="#">Become a host</a></li><li><a href="#">Careers</a></li><li><a href="#">Press</a></li></ul>
+    </div>
+    <div>
+      <h5>Support</h5>
+      <ul><li><a href="#">Help center</a></li><li><a href="#">Cancellation policy</a></li><li><a href="#">Trust &amp; safety</a></li><li><a href="#">Contact</a></li></ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 Solae Villas, Inc.</span>
+    <span>Terms · Privacy · Sitemap</span>
+  </div>
+</footer>
+
+<script>
+  /* Header hide-on-scroll-down */
+  const header = document.getElementById('siteHeader');
+  let lastY = 0;
+  window.addEventListener('scroll', () => {
+    const y = window.scrollY;
+    header.style.transform = (y > lastY && y > 140) ? 'translateY(-100%)' : 'translateY(0)';
+    lastY = y;
+  });
+
+  /* Guest counter */
+  const gcValue = document.getElementById('gcValue');
+  let guests = 4;
+  document.getElementById('gcPlus').addEventListener('click', () => {
+    guests = Math.min(guests + 1, 16); gcValue.textContent = guests;
+  });
+  document.getElementById('gcMinus').addEventListener('click', () => {
+    guests = Math.max(guests - 1, 1); gcValue.textContent = guests;
+  });
+
+  document.getElementById('searchBtn').addEventListener('click', () => {
+    document.getElementById('listings').scrollIntoView({behavior:'smooth'});
+  });
+
+  /* Villa data + rendering */
+  const villas = [
+    {name:'Villa Alang-Alang', loc:'Uluwatu, Bali', type:'cliff', guests:8, beds:4, rating:4.97, reviews:212, price:410, badge:'Guest favorite', grad:'linear-gradient(135deg,#0e3b3b,#3f7d6e)'},
+    {name:'Rumah Pasir', loc:'Canggu, Bali', type:'beachfront', guests:6, beds:3, rating:4.88, reviews:98, price:340, badge:null, grad:'linear-gradient(135deg,#2a5c53,#8fae86)'},
+    {name:'Villa Hutan Hijau', loc:'Ubud, Bali', type:'jungle', guests:10, beds:5, rating:4.93, reviews:156, price:480, badge:'New', grad:'linear-gradient(135deg,#1f3d2a,#5c7d4f)'},
+    {name:'Casa dei Faraglioni', loc:'Amalfi Coast, IT', type:'cliff', guests:6, beds:3, rating:4.99, reviews:301, price:690, badge:'Guest favorite', grad:'linear-gradient(135deg,#1a3350,#5f86a8)'},
+    {name:'Villa Kaldera', loc:'Santorini, GR', type:'cliff', guests:4, beds:2, rating:4.95, reviews:184, price:520, badge:null, grad:'linear-gradient(135deg,#0e2a42,#8fa9c2)'},
+    {name:'Casa Xamán', loc:'Tulum, MX', type:'jungle', guests:8, beds:4, rating:4.86, reviews:74, price:390, badge:null, grad:'linear-gradient(135deg,#3d2f1f,#a37d4c)'},
+    {name:'Villa Ombak Biru', loc:'Seminyak, Bali', type:'beachfront', guests:12, beds:6, rating:4.91, reviews:265, price:610, badge:'Large group', grad:'linear-gradient(135deg,#123b3b,#2f8f8f)'},
+    {name:'Villa Terrazza', loc:'Positano, IT', type:'cliff', guests:5, beds:3, rating:4.97, reviews:143, price:730, badge:null, grad:'linear-gradient(135deg,#2c2440,#7a6ba3)'},
+    {name:'Villa Padi Sunyi', loc:'Ubud, Bali', type:'jungle', guests:4, beds:2, rating:4.89, reviews:61, price:260, badge:null, grad:'linear-gradient(135deg,#233d1f,#6b8f4f)'},
+  ];
+
+  const grid = document.getElementById('villaGrid');
+  function renderVillas(filter){
+    grid.innerHTML = '';
+    villas
+      .filter(v => filter === 'all' ? true : (filter === 'large' ? v.guests >= 6 : v.type === filter))
+      .forEach(v => {
+        const card = document.createElement('div');
+        card.className = 'villa-card';
+        card.innerHTML = `
+          <div class="villa-photo" style="background:${v.grad}">
+            ${v.badge ? `<span class="villa-badge">${v.badge}</span>` : ''}
+            <button class="villa-heart" aria-label="Save villa">♥</button>
+          </div>
+          <div class="villa-info">
+            <div class="villa-loc">${v.loc}</div>
+            <div class="villa-name">${v.name}</div>
+            <div class="villa-meta">${v.guests} guests · ${v.beds} bedrooms · private pool</div>
+            <div class="villa-rating"><span class="stars">★</span> ${v.rating} <span style="color:var(--grey);">(${v.reviews})</span></div>
+            <div class="villa-foot">
+              <div class="villa-price">$${v.price}<span> / night</span></div>
+              <a class="btn ghost" style="border-color:var(--line);padding:8px 16px;font-size:12.5px;" href="#">View</a>
+            </div>
+          </div>
+        `;
+        card.querySelector('.villa-heart').addEventListener('click', (e) => {
+          e.currentTarget.classList.toggle('saved');
+        });
+        grid.appendChild(card);
+      });
+  }
+  renderVillas('all');
+
+  document.querySelectorAll('.filter-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      renderVillas(chip.dataset.filter);
+    });
+  });
+
+  /* Rate chart interactivity */
+  const rcArea = document.getElementById('rcArea');
+  const rcLine = document.getElementById('rcLine');
+  const rcPoints = document.getElementById('rcPoints');
+  const tooltip = document.getElementById('rcTooltip');
+  const priceEl = document.getElementById('rcPrice');
+  const availEl = document.getElementById('rcAvail');
+  const chartWrap = document.getElementById('rateChartWrap');
+
+  const monthData = [
+    {x:40,y:220,price:280,avail:412},{x:230,y:190,price:310,avail:388},
+    {x:440,y:80,price:520,avail:190},{x:640,y:95,price:495,avail:205},
+    {x:850,y:205,price:340,avail:340},{x:970,y:230,price:295,avail:400}
+  ];
+
+  monthData.forEach(pt => {
+    const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    c.setAttribute('cx', pt.x); c.setAttribute('cy', pt.y); c.setAttribute('r', 4.5);
+    c.classList.add('rc-pt');
+    c.addEventListener('mouseenter', (e) => {
+      c.classList.add('hovered');
+      priceEl.textContent = '$' + pt.price + ' / night';
+      availEl.textContent = pt.avail + ' villas open';
+      const rect = chartWrap.getBoundingClientRect();
+      const svgRect = document.getElementById('rateChart').getBoundingClientRect();
+      const scaleX = svgRect.width / 1000;
+      const scaleY = svgRect.height / 320;
+      tooltip.style.left = (pt.x * scaleX) + 'px';
+      tooltip.style.top = (pt.y * scaleY) + 'px';
+      tooltip.style.opacity = '1';
+    });
+    c.addEventListener('mouseleave', () => {
+      c.classList.remove('hovered');
+      tooltip.style.opacity = '0';
+    });
+    rcPoints.appendChild(c);
+  });
+
+  const ratesSection = document.getElementById('rates');
+  let animated = false;
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if(e.isIntersecting && !animated){
+        animated = true;
+        rcArea.classList.add('show');
+        rcLine.classList.add('show');
+      }
+    });
+  }, {threshold:0.3});
+  io.observe(ratesSection);
+</script>
+
+</body>
+</html>

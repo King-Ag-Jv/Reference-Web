@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inventory Studio — CRUD Sample</title>
+<style>
+  :root{
+    --bg:#F5F4F7;
+    --panel:#FFFFFF;
+    --ink:#211F2E;
+    --grey:#6E6A80;
+    --line:#E7E4EE;
+    --indigo:#4B3FE0;
+    --indigo-deep:#372DB0;
+    --indigo-pale:#EDEBFC;
+    --green:#1E9E6B;
+    --green-pale:#E4F6EE;
+    --red:#D6483F;
+    --red-pale:#FBE9E7;
+    --amber:#C7860B;
+    --amber-pale:#FBF0DC;
+    --sidebar:#1C1830;
+    --sidebar-2:#262047;
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.5;
+    -webkit-font-smoothing:antialiased;min-height:100vh;
+  }
+  button{font-family:inherit;cursor:pointer;}
+  input,select{font-family:inherit;}
+  img{max-width:100%;display:block;}
+
+  /* ============ LOGIN SCREEN ============ */
+  #loginScreen{
+    min-height:100vh;display:grid;grid-template-columns:1fr 1fr;
+  }
+  .login-visual{
+    background:linear-gradient(160deg,var(--sidebar) 0%, #362C63 100%);
+    position:relative;overflow:hidden;padding:60px;display:flex;flex-direction:column;justify-content:space-between;color:#EDEBFC;
+  }
+  .login-visual::before{
+    content:'';position:absolute;top:-120px;right:-120px;width:420px;height:420px;border-radius:50%;
+    background:radial-gradient(circle, rgba(75,63,224,.5), transparent 70%);
+  }
+  .login-visual::after{
+    content:'';position:absolute;bottom:-160px;left:-100px;width:380px;height:380px;border-radius:50%;
+    background:radial-gradient(circle, rgba(75,63,224,.3), transparent 70%);
+  }
+  .lv-brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:17px;position:relative;z-index:2;}
+  .lv-brand .mark{width:30px;height:30px;border-radius:8px;background:var(--indigo);display:flex;align-items:center;justify-content:center;font-size:15px;}
+  .lv-copy{position:relative;z-index:2;max-width:420px;}
+  .lv-copy h2{font-size:clamp(26px,3vw,36px);line-height:1.2;font-weight:650;letter-spacing:-.01em;}
+  .lv-copy p{margin-top:14px;color:#C4BEE8;font-size:14.5px;}
+  .lv-stats{display:flex;gap:36px;position:relative;z-index:2;}
+  .lv-stats div{font-size:12px;color:#B0A8DE;text-transform:uppercase;letter-spacing:.06em;}
+  .lv-stats strong{display:block;font-size:24px;color:#fff;font-weight:700;text-transform:none;letter-spacing:0;margin-top:4px;}
+
+  .login-form-side{display:flex;align-items:center;justify-content:center;padding:60px 40px;}
+  .login-box{width:100%;max-width:380px;}
+  .login-box h1{font-size:27px;font-weight:700;letter-spacing:-.01em;}
+  .login-box .sub{color:var(--grey);font-size:14px;margin-top:8px;margin-bottom:34px;}
+  .field{margin-bottom:18px;}
+  .field label{display:block;font-size:12.5px;font-weight:600;color:var(--ink);margin-bottom:7px;}
+  .field input{
+    width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:9px;font-size:14.5px;
+    background:var(--panel);transition:border-color .15s, box-shadow .15s;
+  }
+  .field input:focus{outline:none;border-color:var(--indigo);box-shadow:0 0 0 3px var(--indigo-pale);}
+  .field.error input{border-color:var(--red);}
+  .field-error{font-size:12px;color:var(--red);margin-top:6px;display:none;}
+  .field.error .field-error{display:block;}
+  .field-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px;font-size:13px;}
+  .field-row label{display:flex;align-items:center;gap:7px;color:var(--grey);font-weight:400;}
+  .field-row a{color:var(--indigo);font-weight:600;}
+  .btn{
+    padding:12px 22px;border-radius:9px;font-size:14px;font-weight:600;border:1px solid transparent;
+    transition:all .18s ease;display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  }
+  .btn.primary{background:var(--indigo);color:#fff;}
+  .btn.primary:hover{background:var(--indigo-deep);}
+  .btn.block{width:100%;padding:13px;}
+  .btn.ghost{background:var(--panel);border-color:var(--line);color:var(--ink);}
+  .btn.ghost:hover{border-color:var(--indigo);color:var(--indigo);}
+  .btn.danger{background:var(--red);color:#fff;}
+  .btn.danger:hover{background:#B93A32;}
+  .btn.subtle{background:none;border:none;color:var(--grey);padding:8px 10px;}
+  .btn.subtle:hover{color:var(--ink);}
+  .btn:disabled{opacity:.55;cursor:not-allowed;}
+
+  .demo-hint{
+    margin-top:24px;padding:12px 14px;background:var(--indigo-pale);border-radius:9px;font-size:12.5px;color:var(--indigo-deep);
+  }
+  .login-footer{margin-top:30px;font-size:13px;color:var(--grey);text-align:center;}
+
+  /* ============ DASHBOARD ============ */
+  #dashboard{display:none;min-height:100vh;grid-template-columns:250px 1fr;}
+  #dashboard.active{display:grid;}
+
+  .sidebar{background:var(--sidebar);color:#C4BEE8;padding:26px 18px;display:flex;flex-direction:column;}
+  .sb-brand{display:flex;align-items:center;gap:10px;padding:8px 10px 26px;color:#fff;font-weight:700;font-size:16px;}
+  .sb-brand .mark{width:28px;height:28px;border-radius:7px;background:var(--indigo);display:flex;align-items:center;justify-content:center;font-size:14px;}
+  .sb-nav{display:flex;flex-direction:column;gap:2px;}
+  .sb-link{
+    display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:8px;font-size:13.5px;font-weight:500;
+    color:#B0A8DE;transition:background .15s,color .15s;
+  }
+  .sb-link .ic{width:18px;text-align:center;}
+  .sb-link:hover{background:var(--sidebar-2);color:#fff;}
+  .sb-link.active{background:var(--indigo);color:#fff;}
+  .sb-section-label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#6D6598;margin:22px 0 8px;padding:0 12px;}
+  .sb-footer{margin-top:auto;padding-top:20px;border-top:1px solid rgba(255,255,255,.08);}
+  .sb-user{display:flex;align-items:center;gap:10px;padding:8px 12px;}
+  .sb-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--indigo),#8B7BFF);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px;}
+  .sb-user div p{font-size:13px;color:#fff;font-weight:600;}
+  .sb-user div span{font-size:11.5px;color:#8B84B5;}
+  .sb-logout{width:100%;margin-top:10px;justify-content:flex-start;color:#B0A8DE;font-size:13px;padding:9px 12px;}
+  .sb-logout:hover{color:#fff;background:var(--sidebar-2);}
+
+  .main{padding:32px 40px 60px;overflow-y:auto;}
+  .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:30px;flex-wrap:wrap;gap:16px;}
+  .topbar h1{font-size:24px;font-weight:700;letter-spacing:-.01em;}
+  .topbar .sub{font-size:13.5px;color:var(--grey);margin-top:4px;}
+
+  .stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-bottom:30px;}
+  .stat-card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px;}
+  .stat-card .label{font-size:12px;color:var(--grey);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;}
+  .stat-card .num{font-size:26px;font-weight:700;letter-spacing:-.01em;}
+  .stat-card .delta{font-size:12px;margin-top:6px;font-weight:600;}
+  .stat-card .delta.up{color:var(--green);}
+  .stat-card .delta.down{color:var(--red);}
+
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;}
+  .panel-head{display:flex;justify-content:space-between;align-items:center;padding:20px 22px;border-bottom:1px solid var(--line);flex-wrap:wrap;gap:14px;}
+  .panel-head h2{font-size:16.5px;font-weight:700;}
+  .panel-tools{display:flex;gap:10px;align-items:center;}
+  .search-box{
+    display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:8px;padding:8px 12px;background:var(--bg);
+  }
+  .search-box input{border:none;background:none;font-size:13.5px;outline:none;width:180px;}
+
+  table{width:100%;border-collapse:collapse;}
+  thead th{
+    text-align:left;font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--grey);
+    padding:12px 22px;border-bottom:1px solid var(--line);font-weight:600;background:#FBFAFC;
+  }
+  tbody td{padding:15px 22px;border-bottom:1px solid var(--line);font-size:13.5px;vertical-align:middle;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:#FBFAFC;}
+  .item-name{font-weight:600;}
+  .item-sub{font-size:12px;color:var(--grey);margin-top:2px;}
+  .badge{padding:4px 10px;border-radius:20px;font-size:11.5px;font-weight:700;display:inline-block;}
+  .badge.in{background:var(--green-pale);color:var(--green);}
+  .badge.low{background:var(--amber-pale);color:var(--amber);}
+  .badge.out{background:var(--red-pale);color:var(--red);}
+  .row-actions{display:flex;gap:6px;}
+  .icon-btn{
+    width:30px;height:30px;border-radius:7px;border:1px solid var(--line);background:var(--panel);
+    display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--grey);transition:all .15s;
+  }
+  .icon-btn:hover{border-color:var(--indigo);color:var(--indigo);}
+  .icon-btn.del:hover{border-color:var(--red);color:var(--red);}
+  .empty-state{padding:60px 22px;text-align:center;color:var(--grey);}
+  .empty-state .big{font-size:34px;margin-bottom:10px;}
+
+  /* Modal */
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(28,24,48,.5);display:none;align-items:center;justify-content:center;
+    z-index:500;padding:20px;backdrop-filter:blur(2px);
+  }
+  .modal-overlay.active{display:flex;}
+  .modal{background:var(--panel);border-radius:16px;width:100%;max-width:460px;box-shadow:0 40px 80px -20px rgba(28,24,48,.35);}
+  .modal-head{display:flex;justify-content:space-between;align-items:center;padding:22px 24px;border-bottom:1px solid var(--line);}
+  .modal-head h3{font-size:17px;font-weight:700;}
+  .modal-close{background:none;border:none;font-size:18px;color:var(--grey);width:30px;height:30px;border-radius:7px;}
+  .modal-close:hover{background:var(--bg);color:var(--ink);}
+  .modal-body{padding:22px 24px;}
+  .modal-body .field-2col{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .modal-foot{padding:18px 24px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:10px;}
+  select.field-select{
+    width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:9px;font-size:14px;background:var(--panel);
+  }
+  select.field-select:focus{outline:none;border-color:var(--indigo);box-shadow:0 0 0 3px var(--indigo-pale);}
+
+  /* Toast */
+  #toast{
+    position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);
+    background:var(--ink);color:#fff;padding:13px 20px;border-radius:10px;font-size:13.5px;
+    display:flex;align-items:center;gap:10px;opacity:0;pointer-events:none;transition:all .25s ease;z-index:600;
+    box-shadow:0 20px 40px -10px rgba(0,0,0,.3);
+  }
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  #toast .dot{width:8px;height:8px;border-radius:50%;background:var(--green);}
+  #toast.error .dot{background:var(--red);}
+
+  @media (max-width:900px){
+    #loginScreen{grid-template-columns:1fr;}
+    .login-visual{display:none;}
+    #dashboard.active{grid-template-columns:1fr;}
+    .sidebar{display:none;}
+    .stat-row{grid-template-columns:1fr 1fr;}
+    thead{display:none;}
+    table, tbody, tr, td{display:block;width:100%;}
+    tbody tr{border-bottom:1px solid var(--line);padding:14px 22px;}
+    tbody td{border:none;padding:4px 0;}
+    .row-actions{margin-top:10px;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN SCREEN ============ -->
+<div id="loginScreen">
+  <div class="login-visual">
+    <div class="lv-brand"><span class="mark">◆</span> Inventory Studio</div>
+    <div class="lv-copy">
+      <h2>Every item, tracked in one clean place.</h2>
+      <p>Sign in to add, edit, and manage stock across your warehouse — built as a reference CRUD layout.</p>
+    </div>
+    <div class="lv-stats">
+      <div>Items tracked<strong>1,284</strong></div>
+      <div>Teams using it<strong>36</strong></div>
+      <div>Uptime<strong>99.9%</strong></div>
+    </div>
+  </div>
+
+  <div class="login-form-side">
+    <div class="login-box">
+      <h1>Welcome back</h1>
+      <p class="sub">Sign in to manage your inventory.</p>
+
+      <form id="loginForm" novalidate>
+        <div class="field" id="emailField">
+          <label for="email">Email address</label>
+          <input type="email" id="email" placeholder="you@company.com" value="admin@studio.io">
+          <div class="field-error">Enter a valid email address.</div>
+        </div>
+        <div class="field" id="passField">
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="••••••••" value="demo1234">
+          <div class="field-error">Password must be at least 6 characters.</div>
+        </div>
+        <div class="field-row">
+          <label><input type="checkbox" checked style="margin:0;"> Remember me</label>
+          <a href="#">Forgot password?</a>
+        </div>
+        <button type="submit" class="btn primary block" id="loginBtn">Sign in</button>
+      </form>
+
+      <div class="demo-hint">This is a front-end layout sample — any email/password combination signs you in. No data leaves your browser.</div>
+      <div class="login-footer">Don't have an account? <a href="#" style="color:var(--indigo);font-weight:600;">Request access</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ DASHBOARD ============ -->
+<div id="dashboard">
+  <aside class="sidebar">
+    <div class="sb-brand"><span class="mark">◆</span> Inventory Studio</div>
+    <nav class="sb-nav">
+      <a class="sb-link active" href="#"><span class="ic">▤</span> Items</a>
+      <a class="sb-link" href="#"><span class="ic">↗</span> Orders</a>
+      <a class="sb-link" href="#"><span class="ic">◔</span> Suppliers</a>
+      <a class="sb-link" href="#"><span class="ic">▦</span> Reports</a>
+    </nav>
+    <div class="sb-section-label">Workspace</div>
+    <nav class="sb-nav">
+      <a class="sb-link" href="#"><span class="ic">⚙</span> Settings</a>
+      <a class="sb-link" href="#"><span class="ic">◐</span> Team</a>
+    </nav>
+    <div class="sb-footer">
+      <div class="sb-user">
+        <div class="sb-avatar" id="userAvatar">A</div>
+        <div><p id="userName">Admin User</p><span id="userEmail">admin@studio.io</span></div>
+      </div>
+      <button class="btn subtle sb-logout" id="logoutBtn">↩ Sign out</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <h1>Items</h1>
+        <div class="sub">Create, edit, and remove inventory items.</div>
+      </div>
+      <button class="btn primary" id="openAddModal">+ Add item</button>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat-card"><div class="label">Total items</div><div class="num" id="statTotal">0</div><div class="delta up">↑ live</div></div>
+      <div class="stat-card"><div class="label">In stock</div><div class="num" id="statIn">0</div><div class="delta up">healthy</div></div>
+      <div class="stat-card"><div class="label">Low stock</div><div class="num" id="statLow">0</div><div class="delta down">watch</div></div>
+      <div class="stat-card"><div class="label">Out of stock</div><div class="num" id="statOut">0</div><div class="delta down">reorder</div></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <h2>All items</h2>
+        <div class="panel-tools">
+          <div class="search-box">🔍<input type="text" id="searchInput" placeholder="Search items..."></div>
+        </div>
+      </div>
+      <table>
+        <thead>
+          <tr><th>Item</th><th>Category</th><th>Quantity</th><th>Price</th><th>Status</th><th></th></tr>
+        </thead>
+        <tbody id="itemsBody"></tbody>
+      </table>
+      <div class="empty-state" id="emptyState" style="display:none;">
+        <div class="big">📦</div>
+        <p>No items match your search.</p>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ============ MODAL (Insert / Edit) ============ -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="modalTitle">Add new item</h3>
+      <button class="modal-close" id="modalClose">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="itemForm" novalidate>
+        <input type="hidden" id="itemId">
+        <div class="field" id="nameField">
+          <label for="itemName">Item name</label>
+          <input type="text" id="itemName" placeholder="e.g. Wireless Mouse">
+          <div class="field-error">Item name is required.</div>
+        </div>
+        <div class="field-2col">
+          <div class="field">
+            <label for="itemCategory">Category</label>
+            <select class="field-select" id="itemCategory">
+              <option>Electronics</option>
+              <option>Office Supplies</option>
+              <option>Furniture</option>
+              <option>Packaging</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="field" id="qtyField">
+            <label for="itemQty">Quantity</label>
+            <input type="number" id="itemQty" placeholder="0" min="0">
+            <div class="field-error">Enter a valid quantity.</div>
+          </div>
+        </div>
+        <div class="field-2col">
+          <div class="field" id="priceField">
+            <label for="itemPrice">Unit price ($)</label>
+            <input type="number" id="itemPrice" placeholder="0.00" min="0" step="0.01">
+            <div class="field-error">Enter a valid price.</div>
+          </div>
+          <div class="field">
+            <label for="itemSku">SKU (optional)</label>
+            <input type="text" id="itemSku" placeholder="e.g. WM-204">
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-foot">
+      <button class="btn ghost" id="modalCancel">Cancel</button>
+      <button class="btn primary" id="modalSave">Save item</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"><span class="dot"></span><span id="toastMsg">Saved</span></div>
+
+<script>
+  /* ---------- LOGIN ---------- */
+  const loginForm = document.getElementById('loginForm');
+  const emailField = document.getElementById('emailField');
+  const passField = document.getElementById('passField');
+
+  loginForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const email = document.getElementById('email').value.trim();
+    const pass = document.getElementById('password').value;
+    let valid = true;
+
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    emailField.classList.toggle('error', !emailOk);
+    if(!emailOk) valid = false;
+
+    const passOk = pass.length >= 6;
+    passField.classList.toggle('error', !passOk);
+    if(!passOk) valid = false;
+
+    if(!valid) return;
+
+    document.getElementById('userEmail').textContent = email;
+    document.getElementById('userName').textContent = email.split('@')[0].replace(/[\.\_]/g,' ').replace(/\b\w/g, c => c.toUpperCase());
+    document.getElementById('userAvatar').textContent = email.charAt(0).toUpperCase();
+
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('dashboard').classList.add('active');
+    renderItems();
+  });
+
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    document.getElementById('dashboard').classList.remove('active');
+    document.getElementById('loginScreen').style.display = 'grid';
+  });
+
+  /* ---------- CRUD STATE ---------- */
+  let items = [
+    {id:1, name:'Wireless Mouse', category:'Electronics', qty:142, price:24.99, sku:'WM-204'},
+    {id:2, name:'A4 Printer Paper (Ream)', category:'Office Supplies', qty:8, price:6.50, sku:'PP-A4'},
+    {id:3, name:'Ergonomic Office Chair', category:'Furniture', qty:0, price:189.00, sku:'CH-ERG'},
+    {id:4, name:'Corrugated Shipping Box (M)', category:'Packaging', qty:610, price:0.85, sku:'BX-M12'},
+    {id:5, name:'USB-C Hub, 7-Port', category:'Electronics', qty:23, price:34.50, sku:'HUB-7P'},
+  ];
+  let nextId = 6;
+  let editingId = null;
+  let searchTerm = '';
+
+  function statusFor(qty){
+    if(qty === 0) return {label:'Out of stock', cls:'out'};
+    if(qty <= 15) return {label:'Low stock', cls:'low'};
+    return {label:'In stock', cls:'in'};
+  }
+
+  function renderItems(){
+    const body = document.getElementById('itemsBody');
+    const empty = document.getElementById('emptyState');
+    const filtered = items.filter(i => i.name.toLowerCase().includes(searchTerm.toLowerCase()) || i.category.toLowerCase().includes(searchTerm.toLowerCase()));
+
+    body.innerHTML = '';
+    empty.style.display = filtered.length ? 'none' : 'block';
+
+    filtered.forEach(item => {
+      const st = statusFor(item.qty);
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><div class="item-name">${escapeHtml(item.name)}</div><div class="item-sub">SKU: ${item.sku || '—'}</div></td>
+        <td>${escapeHtml(item.category)}</td>
+        <td>${item.qty}</td>
+        <td>$${item.price.toFixed(2)}</td>
+        <td><span class="badge ${st.cls}">${st.label}</span></td>
+        <td>
+          <div class="row-actions">
+            <button class="icon-btn edit-btn" data-id="${item.id}" title="Edit">✎</button>
+            <button class="icon-btn del del-btn" data-id="${item.id}" title="Delete">🗑</button>
+          </div>
+        </td>
+      `;
+      body.appendChild(tr);
+    });
+
+    document.querySelectorAll('.edit-btn').forEach(b => b.addEventListener('click', () => openModal(parseInt(b.dataset.id))));
+    document.querySelectorAll('.del-btn').forEach(b => b.addEventListener('click', () => deleteItem(parseInt(b.dataset.id))));
+
+    updateStats();
+  }
+
+  function updateStats(){
+    document.getElementById('statTotal').textContent = items.length;
+    document.getElementById('statIn').textContent = items.filter(i => statusFor(i.qty).cls === 'in').length;
+    document.getElementById('statLow').textContent = items.filter(i => statusFor(i.qty).cls === 'low').length;
+    document.getElementById('statOut').textContent = items.filter(i => statusFor(i.qty).cls === 'out').length;
+  }
+
+  function escapeHtml(str){
+    const d = document.createElement('div'); d.textContent = str; return d.innerHTML;
+  }
+
+  document.getElementById('searchInput').addEventListener('input', (e) => {
+    searchTerm = e.target.value;
+    renderItems();
+  });
+
+  /* ---------- MODAL (Create / Update) ---------- */
+  const overlay = document.getElementById('modalOverlay');
+  const modalTitle = document.getElementById('modalTitle');
+  const nameField = document.getElementById('nameField');
+  const qtyField = document.getElementById('qtyField');
+  const priceField = document.getElementById('priceField');
+
+  function openModal(id){
+    editingId = id || null;
+    document.getElementById('itemForm').reset();
+    [nameField, qtyField, priceField].forEach(f => f.classList.remove('error'));
+
+    if(editingId){
+      const item = items.find(i => i.id === editingId);
+      modalTitle.textContent = 'Edit item';
+      document.getElementById('itemId').value = item.id;
+      document.getElementById('itemName').value = item.name;
+      document.getElementById('itemCategory').value = item.category;
+      document.getElementById('itemQty').value = item.qty;
+      document.getElementById('itemPrice').value = item.price;
+      document.getElementById('itemSku').value = item.sku || '';
+    } else {
+      modalTitle.textContent = 'Add new item';
+      document.getElementById('itemCategory').value = 'Electronics';
+    }
+    overlay.classList.add('active');
+  }
+
+  function closeModal(){
+    overlay.classList.remove('active');
+    editingId = null;
+  }
+
+  document.getElementById('openAddModal').addEventListener('click', () => openModal(null));
+  document.getElementById('modalClose').addEventListener('click', closeModal);
+  document.getElementById('modalCancel').addEventListener('click', closeModal);
+  overlay.addEventListener('click', (e) => { if(e.target === overlay) closeModal(); });
+
+  document.getElementById('modalSave').addEventListener('click', () => {
+    const name = document.getElementById('itemName').value.trim();
+    const category = document.getElementById('itemCategory').value;
+    const qty = document.getElementById('itemQty').value;
+    const price = document.getElementById('itemPrice').value;
+    const sku = document.getElementById('itemSku').value.trim();
+
+    let valid = true;
+    nameField.classList.toggle('error', !name); if(!name) valid = false;
+    qtyField.classList.toggle('error', qty === '' || qty < 0); if(qty === '' || qty < 0) valid = false;
+    priceField.classList.toggle('error', price === '' || price < 0); if(price === '' || price < 0) valid = false;
+    if(!valid) return;
+
+    if(editingId){
+      const item = items.find(i => i.id === editingId);
+      item.name = name; item.category = category; item.qty = parseInt(qty); item.price = parseFloat(price); item.sku = sku;
+      showToast('Item updated');
+    } else {
+      items.unshift({id: nextId++, name, category, qty: parseInt(qty), price: parseFloat(price), sku});
+      showToast('Item added');
+    }
+    closeModal();
+    renderItems();
+  });
+
+  function deleteItem(id){
+    const item = items.find(i => i.id === id);
+    if(!item) return;
+    if(confirm(`Delete "${item.name}"? This can't be undone.`)){
+      items = items.filter(i => i.id !== id);
+      renderItems();
+      showToast('Item deleted', true);
+    }
+  }
+
+  /* ---------- TOAST ---------- */
+  let toastTimer;
+  function showToast(msg, isError){
+    const toast = document.getElementById('toast');
+    document.getElementById('toastMsg').textContent = msg;
+    toast.classList.toggle('error', !!isError);
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 2400);
+  }
+</script>
+
+</body>
+</html>
